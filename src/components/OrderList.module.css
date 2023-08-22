@@ -1,0 +1,60 @@
+.h1 {  
+    color: black;
+    font-size: x-large;
+    font-weight: 600;
+    margin-left: 5px;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.h2 {  
+    color: black;
+    font-size: large;
+    font-weight: 400;
+    margin-left: 5px;
+}
+
+.mainHeading {  
+    color: black;
+    font-size: x-large;
+    font-weight: 900;
+    margin-left: 5px;
+    text-align: center;
+}
+
+.listContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh; /* Adjust the height as needed */
+  }
+  
+.list {
+  list-style: none;
+  padding: 20px;
+}
+
+.actions{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+  width:100vw;
+  
+}
+.actions button {
+  font: inherit;
+  cursor: pointer;
+  padding: 0.5rem 1.5rem;
+  border-radius: 4px;
+  background-color: rgb(14, 160, 160);
+}
+
+.actions button[type='button'] {
+  background-color: rgb(16, 170, 170);
+  color: var(--color-gray-300);
+}
+
+.actions button[type='button']:hover {
+  background-color:  rgb(99, 144, 99);
+}

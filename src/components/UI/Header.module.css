@@ -1,0 +1,52 @@
+.header {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5rem;
+  background-color: teal;
+  color: white;
+  align-items: center;
+  padding: 0 5%;
+  padding-top: 15px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.h1 {
+  color: white;
+  font-size: xx-large;
+  font-weight: 900;
+}
+
+.link {
+  color: white;
+  font-size: large;
+  font-weight: 700;
+  margin-top: 5px;
+  padding: 20px;
+}
+.link:hover {
+  color: gray;
+}
+
+.h2 {
+  color: white;
+  font-size: medium;
+  font-weight: 400;
+  margin-top: 10px;
+  padding-top: 5px;
+}
+
+.main-image {
+  width: 100%;
+  height: 25rem;
+  overflow: hidden;
+}
+
+.main-image img {
+  width: 110%;
+  height: 100%;
+  object-fit: cover;
+  transform: rotateZ(-5deg) translateY(-4rem) translateX(-1rem);
+}
+

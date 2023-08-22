@@ -1,0 +1,30 @@
+.table {
+    border: 1px
+}
+
+.actions{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+    width:100vw;
+    
+  }
+  .actions button {
+    font: inherit;
+    cursor: pointer;
+    padding: 0.5rem 1.5rem;
+    border-radius: 4px;
+    background-color: teal;
+    color: teal;
+  }
+  
+  .actions button[type='back'] {
+    background-color: rgb(8, 157, 157);
+    color: var(--color-gray-300);
+  }
+  
+  .actions button[type='back']:hover {
+    background-color:  rgb(31, 185, 185);
+  }
+  
