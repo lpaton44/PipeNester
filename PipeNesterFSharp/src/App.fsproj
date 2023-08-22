@@ -7,6 +7,7 @@
         <Compile Include="Extensions.fs"/>
         <Compile Include="Components.fs"/>
         <Compile Include="Main.fs"/>
+        <Content Include="index.css" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Feliz" Version="2.6.0"/>
