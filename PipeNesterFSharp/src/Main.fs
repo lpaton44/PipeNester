@@ -6,7 +6,5 @@ open Browser.Dom
 open Fable.Core.JsInterop
 
 importAll "./index.css"
-
-
 let root = ReactDOM.createRoot(document.getElementById "feliz-app")
-root.render(Components.Counter())
+root.render(Components.Router())
