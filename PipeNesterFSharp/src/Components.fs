@@ -139,7 +139,7 @@ type Components =
                                ]
                                Html.label [
                                    prop.className "mt-20 text-xl p-5 font-semibold"
-                                   prop.text $"Order Details:"
+                                   prop.text "Order Details:"
                                ]
                                Html.input [
                                    prop.id "order"
