@@ -1,5 +1,7 @@
 namespace App
 
+open System.Drawing
+open Fable.FontAwesome.Fa.Classes
 open Feliz
 open Feliz.Router
 open Fable.FontAwesome.Free
@@ -22,7 +24,12 @@ type Components =
                     prop.children [
                        Html.div [
                            prop.className "text-xl color-white"
-                           prop.children [ Fa.i [Fa.Solid.Truck ] [] ]]
+                           prop.children [
+                              Fa.i [
+                                  Fa.Size Fa.ISize.Fa4x
+                                  Fa.Solid.Truck ] []
+                           ]
+                       ]
 
                        Html.h1 [
                            prop.className "mt-5 ml-10 text-2xl font-bold"
