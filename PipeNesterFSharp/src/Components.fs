@@ -1,52 +1,71 @@
 namespace App
 
-open System.Drawing
-open Fable.FontAwesome.Fa.Classes
+open Thoth.Fetch
+open Thoth.Json
 open Feliz
 open Feliz.Router
 open Fable.FontAwesome.Free
 open Fable.FontAwesome
-type Order = {
-        order: (string*string) List
-        orderNumber: int
-        id: Option<string>
-    }
+
+type Order =
+        {
+          id : string
+          orderNumber : string
+          order : string
+        }
+
+        static member Decoder =
+            Decode.object (fun get ->
+                {
+                  id = get.Required.Field "id" Decode.string
+                  orderNumber =  get.Required.Field "orderNumber" Decode.string
+                  order = get.Required.Field "order" Decode.string
+                }
+            )
+
+        static member Encoder (order : Order) =
+            Encode.object [
+                "id", Encode.string order.id
+                "orderNumber", Encode.string order.orderNumber
+                "order", Encode.string order.order
+            ]
 
 type Components =
+
 
     [<ReactComponent>]
     static member Header() =
         Html.header [
-            prop.className "h-20 bg-teal-600 text-white "
+            prop.className "h-30 bg-teal-600 text-white "
             prop.children [
                 Html.div [
                     prop.className "flex items-center"
                     prop.children [
                        Html.div [
-                           prop.className "text-xl color-white"
+                           prop.className "color-white mt-5 mr-2  ml-10"
                            prop.children [
                               Fa.i [
-                                  Fa.Size Fa.ISize.Fa4x
+                                  Fa.Size Fa.ISize.Fa2x
                                   Fa.Solid.Truck ] []
                            ]
                        ]
 
                        Html.h1 [
-                           prop.className "mt-5 ml-10 text-2xl font-bold"
+                           prop.className "mt-5 text-3xl font-semibold"
                            prop.text "PipeNester"
                        ]
                     ]
                 ]
 
                 Html.div [
-                    prop.className "items-bottom justify-end flex mr-10"
+                    prop.className "items-bottom justify-end flex mr-10 mb-5"
                     prop.children[
                         Html.nav [
-                            prop.className "mr-6 link text-white text-lg font-semibold hover:text-gray-500"
+                            prop.className "mr-20 link text-white text-xl hover:text-gray-500"
                             prop.text "All Orders"
                         ]
                         Html.nav [
-                            prop.className "mr-6 link text-white text-lg font-semibold hover:text-gray-500"
+                            prop.className "mr-20 link text-white text-xl hover:text-gray-500"
                             prop.text "New Order"
                         ]
                     ]
@@ -59,6 +78,18 @@ type Components =
 
     [<ReactComponent>]
     static member OrderForm () =
+
+        let orders =
+            promise {
+                let url = "https://pipenesting-default-rtdb.europe-west1.firebasedatabase.app/pipes.json"
+                return! Fetch.tryGet(url, decoder = Order.Decoder)
+                (*match response with
+                | Ok data -> return data
+                | Error error -> failwith <| printfn $"Error: {error.message}"*)
+            }
+
+
+
 
         let (orderItems, setOrderItems) = React.useState([])
         let (addingItem, setAddingItem) = React.useState(false)
@@ -83,36 +114,55 @@ type Components =
                 setAddingItem false
 
         Html.div [
+            prop.className "items-center justify-center"
+
             prop.children [
                 Html.form [
                     prop.children [
-                        Html.p [
-                            prop.children [
-                                Html.label [
-                                    prop.className "mt-20"
+                       Html.p [
+                           prop.children [
+                               Html.label [
+                                    prop.className "mt-20 text-xl p-5 font-semibold "
                                     prop.text "Order Number:"
                                 ]
-                                Html.input [
-                                    prop.id "orderNumber"
-                                    prop.name "orderNumber"
-                                    prop.defaultValue ""
-                                    prop.type'.text
+                               Html.input [
+                                   prop.id "orderNumber"
+                                   prop.name "orderNumber"
+                                   prop.defaultValue ""
+                                   prop.type'.text
+                                   prop.style [
+                                       style.borderRadius 10
+                                       style.borderColor color.gray
+                                       style.borderWidth 1
+                                   ]
+                                   prop.className "w-7/10 mb-10"
+                               ]
+                               Html.label [
+                                   prop.className "mt-20 text-xl p-5 font-semibold"
+                                   prop.text $"Order Details:"
+                               ]
+                               Html.input [
+                                   prop.id "order"
+                                   prop.name "order"
+                                   prop.defaultValue ""
+                                   prop.type'.text
+                                   prop.style [
+                                       style.borderRadius 10
+                                       style.borderColor color.gray
+                                       style.borderWidth 1
+                                   ]
+                                   prop.className "w-7/10 ml-2"
+                               ]
 
-                                ]
-                            ]
-                        ]
+                           ]
+                       ]
 
-                        Html.p [
-                            prop.children [
-                                Html.label [
-                                    prop.text "Order Details:"
-                                ]
-                            ]
-                        ]
                     ]
                 ]
             ]
         ]
+
+
 
 
     (*[<ReactComponent>]
@@ -164,10 +214,6 @@ type Components =
     ]
     ]
 *)
-
-
-
-
     /// <summary>
     /// The simplest possible React component.
     /// Shows a header with the text Hello World
