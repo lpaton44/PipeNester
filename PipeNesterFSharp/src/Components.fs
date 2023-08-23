@@ -20,9 +20,7 @@ type Components =
                 Html.div [
                     prop.className "flex items-center"
                     prop.children [
-                       Html.i [
-                           prop.className "fa-regular fa-truck fa-xs"
-                       ]
+                       Fa.i [Fa.Icon "Keyboard" ] []
 
                        Html.h1 [
                            prop.className "mt-5 ml-10 text-2xl font-bold"
