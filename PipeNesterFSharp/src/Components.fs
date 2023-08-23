@@ -2,8 +2,8 @@ namespace App
 
 open Feliz
 open Feliz.Router
+open Fable.FontAwesome.Free
 open Fable.FontAwesome
-
 type Order = {
         order: (string*string) List
         orderNumber: int
@@ -20,14 +20,17 @@ type Components =
                 Html.div [
                     prop.className "flex items-center"
                     prop.children [
-                       Fa.i [Fa.Icon "Keyboard" ] []
+                       Html.div [
+                           prop.className "text-xl color-white"
+                           prop.children [ Fa.i [Fa.Solid.Truck ] [] ]]
 
                        Html.h1 [
                            prop.className "mt-5 ml-10 text-2xl font-bold"
                            prop.text "PipeNester"
-                          ]
+                       ]
                     ]
                 ]
+
                 Html.div [
                     prop.className "items-bottom justify-end flex mr-10"
                     prop.children[
@@ -45,6 +48,7 @@ type Components =
 
             ]
         ]
+
 
     [<ReactComponent>]
     static member OrderForm () =
