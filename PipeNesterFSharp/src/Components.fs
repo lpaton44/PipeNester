@@ -9,24 +9,25 @@ open Fable.FontAwesome
 
 type Order =
         {
-          id : string
-          orderNumber : string
-          order : string
+          id: int
+          orderNumber: int
+          order: string
         }
 
         static member Decoder =
             Decode.object (fun get ->
-                {
-                  id = get.Required.Field "id" Decode.string
-                  orderNumber =  get.Required.Field "orderNumber" Decode.string
-                  order = get.Required.Field "order" Decode.string
-                }
-            )
+                  {
+                    id = get.Required.Field "id" Decode.int
+                    orderNumber =  get.Required.Field "orderNumber" Decode.int
+                    order = get.Required.Field "order" Decode.string
+                  }
+             )
+
 
         static member Encoder (order : Order) =
             Encode.object [
-                "id", Encode.string order.id
-                "orderNumber", Encode.string order.orderNumber
+                "id", Encode.int order.id
+                "orderNumber", Encode.int order.orderNumber
                 "order", Encode.string order.order
             ]
 
@@ -80,15 +81,10 @@ type Components =
     static member OrderForm () =
 
         let orders =
-            promise {
-                let url = "https://pipenesting-default-rtdb.europe-west1.firebasedatabase.app/pipes.json"
-                return! Fetch.tryGet(url, decoder = Order.Decoder)
-                (*match response with
-                | Ok data -> return data
-                | Error error -> failwith <| printfn $"Error: {error.message}"*)
-            }
-
-
+                promise {
+                    let url = "https://pipenesting-default-rtdb.europe-west1.firebasedatabase.app/pipes.json"
+                    return! Fetch.get(url, decoder = Decode.list Order.Decoder)
+                }
 
 
         let (orderItems, setOrderItems) = React.useState([])
@@ -139,7 +135,7 @@ type Components =
                                ]
                                Html.label [
                                    prop.className "mt-20 text-xl p-5 font-semibold"
-                                   prop.text "Order Details:"
+                                   prop.text $"Order Details: {orders}"
                                ]
                                Html.input [
                                    prop.id "order"
