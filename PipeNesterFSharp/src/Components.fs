@@ -66,12 +66,12 @@ type Components =
                             prop.children [
                                 Html.a [
                                     prop.onClick (fun _ -> Router.navigate "allOrders")
-                                    prop.className "mr-10 hover:text-gray-500"
+                                    prop.className "mr-10 hover:text-gray-500 cursor-pointer"
                                     prop.text "All Orders"
                                 ]
                                 Html.a [
                                     prop.onClick (fun _ -> Router.navigate "newOrder")
-                                    prop.className "hover:text-gray-500"
+                                    prop.className "hover:text-gray-500 cursor-pointer"
                                     prop.text "Add Order"
                                 ]
                             ]
@@ -110,31 +110,31 @@ type Components =
                 setAddingItem false
 
         Html.div [
-            prop.className "flex justify-items-start "
+            prop.className "flex justify-items-center"
 
             prop.children [
                 Html.form [
-                    prop.className "ml-10 w-full"
+                    prop.className "p-10 mx-10 flex w-full justify-items-center align-center"
 
                     prop.children [
                        Html.p [
-                           prop.className "ml-10 w-full"
+                           prop.className "w-full"
                            (*prop.style [
                                style.borderColor color.red
                                style.borderWidth 1
                            ]*)
                            prop.children [
                                Html.div [
-                                   prop.className "flex items-start w-full"
+                                   prop.className "mx-5 mb-5 w-full justify-items-center align-center"
                                    prop.children [
                                        Html.label [
-                                            prop.className "text-left text-2xl p-5 font-semibold "
+                                            prop.className "text-left text-2xl p-5"
                                             prop.text "Order Number:"
                                        ]
                                    ]
                                ]
                                Html.div [
-                                   prop.className "flex items-start"
+
                                    prop.children [
                                        Html.input [
                                           prop.id "orderNumber"
@@ -146,35 +146,67 @@ type Components =
                                               style.borderColor color.gray
                                               style.borderWidth 1
                                           ]
-                                          prop.className "ml-3 w-7/10"
+                                          prop.className "ml-10 w-96"
                                           prop.ref orderNumberRef
                                       ]
                                    ]
                                ]
                                Html.div [
-                                   prop.className "flex items-start"
+                                   prop.className "p-5 w-full"
                                    prop.children [
                                        Html.label [
-                                            prop.className " p-5 text-2xl p-5 font-semibold"
+                                            prop.className "p-5 text-2xl"
                                             prop.text $"Order Details:"
                                         ]
                                    ]
                                ]
                                Html.div [
-                                   prop.className "flex items-start"
+                                   prop.className ""
                                    prop.children [
-                                       Html.input [
-                                            prop.id "order"
-                                            prop.name "order"
-                                            prop.defaultValue ""
-                                            prop.type'.text
-                                            prop.style [
-                                                style.borderRadius 10
-                                                style.borderColor color.gray
-                                                style.borderWidth 1
-                                            ]
-                                            prop.className " mb-10 w-7/10 ml-2"
-                                        ]
+
+                                       Html.label [
+                                           prop.className "ml-10"
+                                           prop.text $"Current Order: {orderRef.current}"
+                                       ]
+                                   ]
+                               ]
+                               Html.div [
+                                   prop.className "flex justify-end w-3/4 mr-20"
+                                   prop.children [
+                                       if (not editingItem) then
+                                           Html.button [
+                                               prop.className "cursor-pointer bg-teal-500 rounded p-3 text-large text-black hover:bg-teal-600"
+                                               prop.text "Add Item to Order"
+                                           ]
+                                   ]
+                               ]
+                               Html.div [
+                                   prop.className "flex w-3/4 items-center justify-end mr-20 gap-5 mt-10 ml-10"
+                                   prop.children [
+                                       if editingItem then
+                                           Html.button [
+                                               prop.className "cursor-pointer bg-green-500 rounded p-3 text-large text-black hover:bg-green-600"
+                                               prop.text "Add Item"
+                                           ]
+
+                                           Html.button [
+                                                Html.button [
+                                                    prop.className "cursor-pointer bg-gray-300 rounded p-3 text-large text-black hover:bg-red-300"
+                                                    prop.text "Cancel Order"
+                                                ]
+                                           ]
+
+                                       else
+                                           Html.button [
+                                               prop.className "cursor-pointer bg-green-500 rounded p-3 text-large text-black hover:bg-green-600"
+                                               prop.text "Save Order"
+                                           ]
+                                           Html.button [
+                                                Html.button [
+                                                    prop.className "cursor-pointer bg-gray-300 rounded p-3 text-large text-black hover:bg-red-300"
+                                                    prop.text "Cancel Order"
+                                                ]
+                                           ]
                                    ]
                                ]
                            ]
@@ -219,9 +251,11 @@ type Components =
                                  prop.text $"{order}"
                              ])
         Html.div [
+            prop.className "px-20"
             prop.children [
                 Html.h1 [
-                    prop.className "text-xl font-bold"
+                    prop.className "text-center mb-10 text-xl underline font-bold"
+                    prop.text "All Orders"
                 ]
                 Html.table [
                     prop.className "min-w-full py-2 text-center table-auto text-xl"
@@ -244,7 +278,6 @@ type Components =
                                        prop.className (if index % 2 = 0 then "bg-gray-100" else "bg-white border-b dark:border-neutral-500")
                                        prop.children [
                                            Html.td [
-
                                                prop.text $"{orderItem.orderNumber}"
                                            ]
                                            Html.td [
