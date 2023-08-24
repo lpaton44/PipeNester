@@ -1,5 +1,6 @@
 namespace App
 
+open Fable.Core
 open Thoth.Fetch
 open Thoth.Json
 open Feliz
@@ -32,7 +33,6 @@ type Order =
             ]
 
 type Components =
-
 
     [<ReactComponent>]
     static member Header() =
@@ -223,33 +223,50 @@ type Components =
     [<ReactComponent>]
     static member OrderList() =
 
-        let orders =
-                promise {
-                    let url = "https://pipenesting-default-rtdb.europe-west1.firebasedatabase.app/pipes.json"
-                    return! Fetch.get(url, decoder = Decode.list Order.Decoder)
-                }
+        let orders, setOrders = React.useState Array.empty
 
-        let orders =
-            [
-                {
-                    id =  1
-                    orderNumber = 1
-                    order = "[(3,25), (2, 75), (5,110)]"
-                };
-                {
-                    id =  2
-                    orderNumber = 2
-                    order = "[(5,25), (1, 75), (10,110)]"
-                }
-            ]
+        let getDataA () :JS.Promise<Order []> = // Setup API call inside component to keep all related calls together with the component
+            promise {
+                let url = sprintf "https://pipenesting-default-rtdb.europe-west1.firebasedatabase.app/pipes.json"
+                return! Fetch.get (url, caseStrategy = CamelCase)
+            }
 
-        let listItems =
-            orders |> List.map
-                          (fun item ->
-                             let order = item.order
-                             Html.li [
-                                 prop.text $"{order}"
-                             ])
+
+        React.useEffectOnce (fun () ->
+            let d = getDataA() // get the data from the API call (Promise)
+            d.``then``setOrders// On promise return set order state to returned result
+            |> ignore // ignore promise after state has been set as React.useEffect always needs to return a unit
+        )
+
+        //let orders =
+        //        promise {
+        //            let url = "https://pipenesting-default-rtdb.europe-west1.firebasedatabase.app/pipes.json"
+        //            return! Fetch.get(url, decoder = Decode.list Order.Decoder)
+        //        }
+
+        //let orders =
+        //    [
+        //        {
+        //            id =  1
+        //            orderNumber = 1
+        //            order = "[(3,25), (2, 75), (5,110)]"
+        //        };
+        //        {
+        //            id =  2
+        //            orderNumber = 2
+        //            order = "[(5,25), (1, 75), (10,110)]"
+        //        }
+        //    ]
+
+        //let listItems =
+        //    orders |> Array.map
+        //                  (fun item ->
+        //                     let order = item.order
+        //                     Html.li [
+        //                         prop.text $"{order}"
+        //                     ])
+
+
         Html.div [
             prop.className "px-20"
             prop.children [
@@ -272,6 +289,7 @@ type Components =
                         Html.tbody [
                            prop.children (
                                orders
+                               |> Array.toList
                                |> List.mapi (fun index orderItem ->
                                    Html.tr [
                                        prop.key orderItem.id
