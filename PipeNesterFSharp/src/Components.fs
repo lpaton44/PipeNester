@@ -1,9 +1,11 @@
 namespace App
 
+
+open System.Text.Json.Nodes
 open Browser.Types
-open Fable.Core
 open Thoth.Fetch
 open Thoth.Json
+open Fable.Core
 open Feliz
 open Feliz.Router
 open Fable.FontAwesome.Free
@@ -14,7 +16,6 @@ type Order =
           orderNumber: int
           order: string
         }
-
         static member Decoder =
             Decode.object (fun get ->
                   {
@@ -73,11 +74,8 @@ type Components =
                                 ]
                             ]
                         ]
-
                     ]
-
                 ]
-
             ]
         ]
 
@@ -89,24 +87,21 @@ type Components =
         let (addingItem, setAddingItem) = React.useState false
         let (editingItem, setEditingItem) = React.useState false
 
-        let mutable itemDiameterRef = React.useRef None
-        let mutable itemQuantityRef = React.useRef None
-        let mutable orderNumberRef = React.useRef None
-        let mutable orderRef = React.useRef List.empty
+        let orderNumberRef = React.useRef None
+
+        let (itemDiameter, setItemDiameter) = React.useState ""
+        let (itemQuantity, setItemQuantity) = React.useState ""
 
         let addNewItemHandler () =
-            if (itemDiameterRef.current = None) || (itemQuantityRef.current = None) then
+            if (itemDiameter = "") || (itemQuantity = "") then
                 ()
             else
-                let newItem = [itemDiameterRef.current, itemQuantityRef.current]
-                              |> List.map unbox<HTMLInputElement>
-                              |> List.map (fun i -> i.value)
 
-                let newItems = newItem@orderItems
+                let newItem = $"({itemDiameter}, {itemQuantity})"
+                let newItems = newItem::orderItems
 
-                orderRef.current <- newItems
-                itemDiameterRef.current <- None
-                itemQuantityRef.current <- None
+                setItemDiameter ""
+                setItemQuantity ""
                 setOrderItems newItems
                 setAddingItem false
 
@@ -116,30 +111,25 @@ type Components =
                 orderNumber = newOrderNumber.value |> int
                 order = orderItems |> String.concat "; "
             }
+            let prom =
+                promise {
+                    let url = "https://pipenesting-default-rtdb.europe-west1.firebasedatabase.app/pipes.json"
+                    return! Fetch.post (url, newOrder, caseStrategy = CamelCase)
+                }
+            Router.navigate("allOrders")
 
-            promise {
-                let url = sprintf "https://pipenesting-default-rtdb.europe-west1.firebasedatabase.app/pipes.json"
-                return! Fetch.post (url, newOrder, caseStrategy = CamelCase)
-            }
-
-
-        let orderString =
-            orderItems |> List.fold (fun acc i -> $"({i}) {acc}") ""
+        let orderString = orderItems |> String.concat "; "
 
         Html.div [
             prop.className "flex justify-items-center"
 
             prop.children [
-                Html.form [
+                Html.div [
                     prop.className "p-10 mx-10 flex w-full justify-items-center align-center"
 
                     prop.children [
                        Html.div [
                            prop.className "w-full"
-                           (*prop.style [
-                               style.borderColor color.red
-                               style.borderWidth 1
-                           ]*)
                            prop.children [
                                Html.div [
                                    prop.className "mx-5 mb-5 w-full justify-items-center align-center"
@@ -156,8 +146,8 @@ type Components =
                                        Html.input [
                                           prop.id "orderNumber"
                                           prop.name "orderNumber"
+                                          prop.placeholder "Enter a number"
                                           prop.type'.number
-                                          prop.defaultValue ""
                                           prop.style [
                                               style.borderRadius 10
                                               style.borderColor color.gray
@@ -173,7 +163,7 @@ type Components =
                                    prop.children [
                                        Html.label [
                                             prop.className "text-left text-2xl p-5 font-semibold"
-                                            prop.text $"Order Details:"
+                                            prop.text "Order Details:"
                                        ]
                                    ]
                                ]
@@ -183,7 +173,7 @@ type Components =
                                        Html.div [
                                            prop.children [
                                                Html.label [
-                                                   prop.className "ml-20 mt-5 text-xl"
+                                                   prop.className "ml-20 mt-5 text-xl font-semibold"
                                                    prop.text $"Current Order: {orderString}"
                                                ]
                                            ]
@@ -196,13 +186,12 @@ type Components =
                                                        prop.className "ml-5 mb-3"
                                                        prop.children [
                                                            Html.label [
-                                                              prop.className "p-5 ml-1 text-large"
+                                                              prop.className "p-5 ml-1 text-xl"
                                                               prop.text $"Diameter:"
                                                             ]
                                                            Html.input [
                                                               prop.id "diameter"
                                                               prop.name "diameter"
-                                                              prop.defaultValue ""
                                                               prop.type'.number
                                                               prop.style [
                                                                   style.borderRadius 10
@@ -210,7 +199,11 @@ type Components =
                                                                   style.borderWidth 1
                                                               ]
                                                               prop.className "ml-10 p-1"
-                                                              prop.ref itemDiameterRef
+                                                              prop.onChange (fun (event : Event) ->
+                                                                  let newDiameter =
+                                                                      (event.target:?> HTMLInputElement).value
+                                                                  setItemDiameter newDiameter
+                                                              )
                                                            ]
                                                        ]
                                                    ]
@@ -219,13 +212,12 @@ type Components =
                                                        prop.className "ml-5 p-2 mb-10 "
                                                        prop.children [
                                                           Html.label [
-                                                              prop.className "p-5 text-large"
-                                                              prop.text $"Quantity:"
+                                                              prop.className "p-5 text-xl"
+                                                              prop.text "Quantity:"
                                                           ]
                                                           Html.input [
                                                             prop.id "quantity"
                                                             prop.name "quantity"
-                                                            prop.defaultValue ""
                                                             prop.type'.number
                                                             prop.style [
                                                                 style.borderRadius 10
@@ -233,17 +225,17 @@ type Components =
                                                                 style.borderWidth 1
                                                             ]
                                                             prop.className "ml-10 p-1"
-                                                            prop.ref itemQuantityRef
+                                                            prop.onChange (fun (event : Event) ->
+                                                                  let newQuantity =
+                                                                      (event.target:?> HTMLInputElement).value
+                                                                  setItemQuantity newQuantity
+                                                              )
                                                          ]
                                                        ]
                                                    ]
-
-
                                                ]
                                            ]
-
                                        ]
-
                                     ]
                                Html.div [
                                    prop.className "flex justify-end w-3/4 mr-20"
@@ -277,11 +269,12 @@ type Components =
                                            Html.button [
                                                prop.className "cursor-pointer bg-green-500 rounded p-3 text-large text-black hover:bg-green-600"
                                                prop.text "Save Order"
+                                               prop.onClick (fun _ -> submitHandler())
                                            ]
                                            Html.button [
                                                     prop.className "cursor-pointer bg-gray-300 rounded p-3 text-large text-black hover:bg-red-300"
                                                     prop.text "Cancel Order"
-                                                    prop.onClick (fun _ -> Router.navigate("allOrders"))
+                                                    prop.onClick (fun _ -> Router.navigate("/allOrders"))
                                            ]
                                    ]
                                ]
@@ -293,24 +286,22 @@ type Components =
         ]
 
 
-
-
-
     [<ReactComponent>]
     static member OrderList() =
 
-        let orders, setOrders = React.useState Array.empty
+        let (initialOrders, setInitialOrders) = React.useState Map.empty
 
-        let getDataA () :JS.Promise<Order []> = // Setup API call inside component to keep all related calls together with the component
+
+        let getDataA () = // Setup API call inside component to keep all related calls together with the component
             promise {
-                let url = sprintf "https://pipenesting-default-rtdb.europe-west1.firebasedatabase.app/pipes.json"
-                return! Fetch.get (url, caseStrategy = CamelCase)
+                let url = "https://pipenesting-default-rtdb.europe-west1.firebasedatabase.app/pipes.json"
+                return! Fetch.get (url, decoder = Decode.dict Order.Decoder , caseStrategy = CamelCase)
             }
 
 
         React.useEffectOnce (fun () ->
             let d = getDataA() // get the data from the API call (Promise)
-            d.``then``setOrders// On promise return set order state to returned result
+            d.``then``setInitialOrders// On promise return set order state to returned result
             |> ignore // ignore promise after state has been set as React.useEffect always needs to return a unit
         )
 
@@ -322,7 +313,6 @@ type Components =
                              //|> List.map (fun i -> i.Trim('(', ')'))
 
             Html.ul [
-
                 prop.children (splitItems
                 |> List.map(fun item ->
                     Html.li [
@@ -353,8 +343,9 @@ type Components =
                         ]
                         Html.tbody [
                            prop.children (
-                               orders
-                               |> Array.toList
+                               initialOrders
+                               |> Map.values
+                               |> Seq.toList
                                |> List.mapi (fun index orderItem ->
                                    Html.tr [
                                        prop.key orderItem.orderNumber
@@ -376,8 +367,6 @@ type Components =
                 ]
             ]
         ]
-
-
 
     /// <summary>
     /// A React component that uses Feliz.Router
