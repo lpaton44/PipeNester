@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29418.71
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "App", "src\App.fsproj", "{E5DEFC96-37CF-4844-9C9E-CFA0A9A8AED3}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "p02_App", "src\p02_App.fsproj", "{E5DEFC96-37CF-4844-9C9E-CFA0A9A8AED3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BACD6DDA-A974-47EC-813A-4C76682A4536}"
 	ProjectSection(SolutionItems) = preProject
@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		vite.config.js = vite.config.js
 		webpack.config.js = webpack.config.js
 	EndProjectSection
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "p01_PipeNestingDomain", "p01_PipeNestingDomain\p01_PipeNestingDomain.fsproj", "{47FE3B9E-946B-48EB-AA8B-820023447242}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,6 +32,10 @@ Global
 		{7821B727-268F-44AD-8136-B300B323F578}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7821B727-268F-44AD-8136-B300B323F578}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7821B727-268F-44AD-8136-B300B323F578}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47FE3B9E-946B-48EB-AA8B-820023447242}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47FE3B9E-946B-48EB-AA8B-820023447242}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47FE3B9E-946B-48EB-AA8B-820023447242}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47FE3B9E-946B-48EB-AA8B-820023447242}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

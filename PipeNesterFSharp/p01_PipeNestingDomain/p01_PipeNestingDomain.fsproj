@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <RootNamespace>PipeNestingDomain</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Types.fs" />
+        <Compile Include="Version1.fs" />
+        <Compile Include="Version3.fs" />
+        <Compile Include="Program.fs" />
+        <Content Include="pipe_nesting.csv" />
+        
+    </ItemGroup>
+
+</Project>

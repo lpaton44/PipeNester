@@ -163,16 +163,12 @@ type Components =
                                            prop.children [
                                                Html.label [
                                                    prop.className "ml-20 mt-5 text-xl"
-                                                   prop.text "Current Order:"
-                                                   prop.children [
-                                                       Html.span [
-                                                           prop.text  $"{orderString}"
-                                                           prop.className "ml-20 mt-5 text-xl"
-                                                       ]
+                                                   prop.text $"Current Order: {orderString}"
+
                                                    ]
                                                ]
                                            ]
-                                       ]
+
                                        Html.div [
                                            prop.className "mt-7 ml-10"
                                            prop.children [
@@ -222,7 +218,7 @@ type Components =
                                                ]
                                            ]
                                        ]
-                                    ]
+                               ]
                                Html.div [
                                    prop.className "flex justify-end w-full mr-20"
                                    prop.children [
