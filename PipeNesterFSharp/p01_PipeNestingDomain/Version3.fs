@@ -34,11 +34,7 @@ module Version3 =
              | _ , _ -> inner (n - 1) (l1 @ [List.head l2]) (List.tail l2)
          inner n List.empty l
 
-      let appendToFile (filePath: string) (content: string) =
-            File.AppendAllText(filePath, content)
 
-      let clearFile (filePath: string) =
-            File.WriteAllText(filePath, "")
 
    module State =
 
@@ -716,31 +712,36 @@ module Version3 =
          |> List.groupBy id
          |> List.map (fun (x, xs) -> xs.Length, x)
 
-      let printGroupedNodes state fileName =
+      let appendToString string1 string2 =
+         $"{string1} {string2}"
+
+      let getGroupedNodes state =
 
          let results = groupOuterNodes state
-         let appendToFile = Helpers.appendToFile fileName
-         appendToFile $"Surface Area: {Nesting.getSurfaceArea state}\n"
+         let finalString = $"Surface Area: {Nesting.getSurfaceArea state}\n"
 
-         let rec processNode node level =
+         let rec processNode node level finalString =
             match node.Children with
-            | [] -> appendToFile $"{getIndents level}{(node.Diameter |> PipeDiameter.toInt)}\n"
+            | [] -> appendToString finalString $"{level},{(node.Diameter |> PipeDiameter.toInt)}"
             | childrenL ->
-               appendToFile $"{getIndents level}{node.Diameter |> PipeDiameter.toInt}\n"
-               let rec loop children level =
-                  match children with
-                  | [] -> appendToFile ""
-                  | child::tail ->
-                     processNode child (level + 1)
-                     loop tail level
 
-               loop childrenL (level + 1)
+               let newString = appendToString finalString $"{level},{node.Diameter |> PipeDiameter.toInt};"
+
+               let rec loop children level newString =
+                  match children with
+                  | [] ->  newString
+                  | child::tail ->
+                     let updatedString = processNode child (level + 1) newString
+                     loop tail level updatedString
+
+               loop childrenL (level + 1) newString
 
          results
-         |> List.iter (fun (i,node) ->
-            appendToFile $"{i} trees:\n"
-            processNode node 2
-            )
+         |> List.map (fun (i,node) ->
+            processNode node 2 $" {i} trees: ; "
+         )
+
+
 
       let runAllAlgorithms state =
 
@@ -763,37 +764,3 @@ module Version3 =
                //printGroupedNodes state' "grouped.txt" //uncomment to see generations
                inner state' (generationsN - 1)
          inner state generationsN
-
-
-      //not sure we need
-      let print results state fileName =
-         let appendToFile = Helpers.appendToFile fileName
-         let rec print pipe level =
-            match level with
-            | 0 ->  appendToFile $"{(state.PipeM |> Map.find pipe).Diameter |> PipeDiameter.toInt}\n"
-            | _ ->
-               appendToFile "  "
-               print pipe (level - 1)
-
-         results
-         |> List.iter
-               (List.iter
-                   (fun (item, level) ->
-                     print item level))
-
-      let compareResults state surfaceArea time fileName =
-
-         let topLevel = state.PipeM |> Nesting.getTopLevel
-         let results = flatten state (topLevel |> List.map fst) // allows us to get tupled results
-         let appendToFile = Helpers.appendToFile fileName
-
-         Helpers.clearFile fileName
-         match surfaceArea with
-         | None -> appendToFile $"SA: {Nesting.getSurfaceArea state}\n"
-         | Some sa -> appendToFile $"SA: {sa}\n"
-
-         match time with
-         | None -> appendToFile "Execution Time: N/A \n"
-         | Some t -> appendToFile $"Execution Time: {t} ms \n"
-
-         print results state fileName

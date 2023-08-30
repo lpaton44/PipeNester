@@ -10,9 +10,9 @@
         <Compile Include="Types.fs" />
         <Compile Include="Version1.fs" />
         <Compile Include="Version3.fs" />
-        <Compile Include="Program.fs" />
         <Content Include="pipe_nesting.csv" />
-        
+        <Content Include="D105352  PVC pipe nesting calculator - Sheet8.csv" />
+        <Content Include="D105352  PVC pipe nesting calculator - Sheet9.csv" />
     </ItemGroup>
 
 </Project>

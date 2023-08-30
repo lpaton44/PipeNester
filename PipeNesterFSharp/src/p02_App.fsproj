@@ -4,6 +4,9 @@
         <RootNamespace>App</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
+        <ProjectReference Include="../p01_PipeNestingDomain/p01_PipeNestingDomain.fsproj" />
+    </ItemGroup>
+    <ItemGroup>
         <None Include="index.html" />
         <Compile Include="Extensions.fs" />
         <Compile Include="Components.fs" />

@@ -4,16 +4,35 @@ open System.IO
 
 module Attempt1 =
 
+   let lookupTableData = [
+
+        [0; 500; 400; 355; 315; 250; 200; 160; 140; 125; 110; 90; 75; 63; 50; 40; 32; 25];
+      [500;   0;   0;   0;   0;   0;   0;   0;   0;   0;   0;  0;  0;  0;  0;  0;  0;  0];
+      [400;   1;   0;   0;   0;   0;   0;   0;   0;   0;   0;  0;  0;  0;  0;  0;  0;  0];
+      [355;   1;   0;   0;   0;   0;   0;   0;   0;   0;   0;  0;  0;  0;  0;  0;  0;  0];
+      [315;   1;   1;   0;   0;   0;   0;   0;   0;   0;   0;  0;  0;  0;  0;  0;  0;  0];
+      [250;   1;   1;   1;   1;   0;   0;   0;   0;   0;   0;  0;  0;  0;  0;  0;  0;  0];
+      [200;   2;   1;   1;   1;   1;   0;   0;   0;   0;   0;  0;  0;  0;  0;  0;  0;  0];
+      [160;   4;   2;   1;   1;   1;   1;   0;   0;   0;   0;  0;  0;  0;  0;  0;  0;  0];
+      [140;   5;   3;   1;   1;   1;   1;   0;   0;   0;   0;  0;  0;  0;  0;  0;  0;  0];
+      [125;   7;   4;   3;   2;   1;   1;   1;   0;   0;   0;  0;  0;  0;  0;  0;  0;  0];
+      [110;   8;   5;   4;   3;   1;   1;   1;   0;   0;   0;  0;  0;  0;  0;  0;  0;  0];
+      [ 90;  14;   8;   7;   5;   3;   1;   1;   1;   1;   0;  0;  0;  0;  0;  0;  0;  0];
+      [ 75;  17;  10;   8;   7;   4;   2;   1;   1;   1;   1;  0;  0;  0;  0;  0;  0;  0];
+      [ 63;  22;  14;  10;   9;   5;   4;   1;   1;   1;   1;  0;  0;  0;  0;  0;  0;  0];
+      [ 50;  36;  23;  17;  14;   8;   6;   4;   2;   1;   1;  1;  1;  0;  0;  0;  0;  0];
+      [ 40;  86;  53;  39;  32;  20;  13;   8;   7;   4;   3;  1;  1;  1;  1;  0;  0;  0];
+      [ 32; 123;  79;  57;  48;  30;  19;  11;   8;   7;   5;  3;  1;  1;  1;  1;  0;  0];
+      [ 25; 285; 181; 137; 116;  74;  44;  29;  21;  18;  13;  8;  5;  4;  2;  1;  1;  0]
+
+   ]
+
    let lookUpTable =
-      let filePath = "pipe_nesting.csv"
-      let rows = File.ReadLines filePath |> Seq.toList
-      let table =
-         rows |> List.map (fun row -> row.Split ";" |> Array.toList) |> List.map (List.map int)
       let mutable lookUp = Map.empty
-      for i in 1..(table.Length - 1) do
-         for j in 1..(table.Length - 1) do
-            let key = (PipeDiameter (table[i][0]), PipeDiameter (table[0][j]))
-            let value = table[i][j]
+      for i in 1..(lookupTableData.Length - 1) do
+         for j in 1..(lookupTableData.Length - 1) do
+            let key = (PipeDiameter (lookupTableData[i][0]), PipeDiameter (lookupTableData[0][j]))
+            let value = lookupTableData[i][j]
             lookUp <- lookUp.Add (key,value)
       lookUp
 

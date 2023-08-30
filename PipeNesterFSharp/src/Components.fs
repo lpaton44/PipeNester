@@ -1,6 +1,7 @@
 namespace App
 
 open Browser.Types
+open Nester.Version3
 open Thoth.Fetch
 open Thoth.Json
 open Fable.Core
@@ -8,6 +9,7 @@ open Feliz
 open Feliz.Router
 open Fable.FontAwesome.Free
 open Fable.FontAwesome
+open Nester
 
 type Order =
         {
@@ -395,7 +397,7 @@ type Components =
         let removeBracketsFromPair (pair: string List) =
              pair
             |> List.map (fun i ->
-                i.Trim([|'('; ')'|]))
+                i.Trim([|'('; ')'|]).Trim() |> int)
 
 
         let getDetails (orderString : string) =
@@ -414,15 +416,42 @@ type Components =
             | Some value -> $"{value.orderNumber}"
             | None -> "No order found."
 
+        let convertOrderToList =
+           match order with
+           | Some validOrder ->
+
+                let details = getDetails validOrder.order
+                let tuples =
+                    details
+                    |> List.map (fun item -> (item[0],item[1]))
+
+                [
+                   for p, n in tuples do
+                      for _ in 1..n do
+                         {Diameter = PipeDiameter p; ParentIdO = None}
+                ]
+           | None -> []
+
+        let getNesting pipeL =
+            let state = Nesting.createInitialState pipeL
+            let nesting = topDown.nestTopDown state
+            Results.getGroupedNodes nesting
+
+        let getTreeItems (treeString: string) =
+            treeString.Split(";")
+               |> Array.toList
+
+
+
         Html.div [
             prop.className "w-screen"
             prop.children [
                 Html.h1 [
-                    prop.className "text-center mb-10 text-xl font-bold"
+                    prop.className "text-center mb-10 text-2xl font-bold"
                     prop.text $"Order Number {checkIfFound}"
                 ]
                 Html.table [
-                    prop.className "py-2 text-center table-auto text-xl sm:w-full lg:w-3/4 xl:w-1/2 m-auto"
+                    prop.className "py-2 text-center table-auto text-xl sm:w-full lg:w-1/2 xl:w-1/2 m-auto"
                     prop.children [
                         Html.thead [
                         prop.className "border-b font-semibold dark:border-neutral-500"
@@ -459,6 +488,53 @@ type Components =
                     ]
                 ]
                 Html.div [
+                    prop.className "w-1/3 m-auto mb-"
+                    prop.children [
+                         Html.h1 [
+                                prop.className "text-center text-xl font-bold mt-20 mb-10"
+                                prop.text $"Nesting"
+                            ]
+                         Html.ul [
+                            prop.children (getNesting convertOrderToList
+                                |> List.mapi(fun index tree ->
+                                    Html.li [
+                                        prop.className
+                                            (if index % 2 = 0 then "bg-gray-100 p-2 text-center"
+                                                else " text-center bg-white border-b dark:border-neutral-500 p-2")
+                                        prop.children (getTreeItems tree
+                                        |> List.map (fun treeItem ->
+                                            if treeItem.Contains("tree") then
+                                                Html.h1 [
+                                                    prop.className "text-xl font-semibold"
+                                                    prop.text $"{treeItem}"
+                                                ]
+                                            else
+                                                let itemWithIndent =
+                                                   treeItem.Split(',')
+                                                   |> Array.map (fun i -> i.Trim())
+                                                   |> Array.toList
+                                                   |> List.map int
+
+
+                                                let indentValue = itemWithIndent[0] * 20
+                                                let indent =  $"{indentValue}px"
+
+                                                Html.p [
+                                                    prop.style [
+                                                        style.textIndent indent
+                                                    ]
+                                                    prop.text $"{itemWithIndent[1]}"
+                                                ]
+                                            )
+                                        )
+                                    ]
+                                )
+                            )
+                         ]
+                    ]
+                ]
+
+                Html.div [
                     prop.className "w-full grid justify-items-center"
                     prop.children [
                          Html.button [
@@ -468,8 +544,11 @@ type Components =
                          ]
                     ]
                 ]
+
+
             ]
         ]
+
 
     /// <summary>
     /// A React component that uses Feliz.Router
