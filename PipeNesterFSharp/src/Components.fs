@@ -1,7 +1,6 @@
 namespace App
 
 open Browser.Types
-open Nester.Version3
 open Thoth.Fetch
 open Thoth.Json
 open Fable.Core
@@ -10,25 +9,7 @@ open Feliz.Router
 open Fable.FontAwesome.Free
 open Fable.FontAwesome
 open Nester
-
-type Order =
-        {
-          orderNumber: int
-          order: string
-        }
-        static member Decoder =
-            Decode.object (fun get ->
-                  {
-                    orderNumber = get.Required.Field "orderNumber" Decode.int
-                    order = get.Required.Field "order" Decode.string
-                  }
-             )
-
-        static member Encoder (order : Order) =
-            Encode.object [
-                "orderNumber", Encode.int order.orderNumber
-                "order", Encode.string order.order
-            ]
+open Nester.Nester
 
 type Components =
 
@@ -41,7 +22,7 @@ type Components =
                     prop.className "flex items-center"
                     prop.children [
                        Html.div [
-                           prop.className "color-white mt-5 mr-2  ml-10"
+                           prop.className "color-white mt-5 mr-2 ml-10"
                            prop.children [
                               Fa.i [
                                   Fa.Size Fa.ISize.Fa2x
@@ -50,7 +31,7 @@ type Components =
                        ]
 
                        Html.h1 [
-                           prop.className "mt-5 text-3xl font-semibold"
+                           prop.className "mt-5 sm:text-2xl lg:text-3xl font-semibold"
                            prop.text "PipeNester"
                        ]
                     ]
@@ -80,7 +61,7 @@ type Components =
         ]
 
 
-    [<ReactComponent>]
+    (*[<ReactComponent>]
     static member OrderForm () =
 
         let (orderItems, setOrderItems) = React.useState []
@@ -428,7 +409,10 @@ type Components =
                 [
                    for p, n in tuples do
                       for _ in 1..n do
-                         {Diameter = PipeDiameter p; ParentIdO = None}
+                         {
+                             Diameter = PipeDiameter p
+                             ParentIdO = None
+                         }
                 ]
            | None -> []
 
@@ -547,7 +531,7 @@ type Components =
 
 
             ]
-        ]
+        ]*)
 
 
     /// <summary>
@@ -563,9 +547,12 @@ type Components =
                 Components.Header()
 
                 match currentUrl with
-                | [ "newOrder" ] -> Components.OrderForm()
-                | ["allOrders"] -> Components.OrderList()
-                | ["allOrders"; id] -> Components.OrderDetails(id)
+                (*| ["newOrderOld" ] -> Components.OrderForm()
+                | ["allOrdersOld"] -> Components.OrderList()
+                | ["allOrdersOld"; id] -> Components.OrderDetails(id)*)
+                | ["newOrder"] -> NewComponents.OrderForm()
+                | ["allOrders"] -> NewComponents.OrderList()
+                | ["allOrders"; id] -> NewComponents.OrderDetails(id)
                 | otherwise -> Html.h1 "Not found"
             ]
         ]

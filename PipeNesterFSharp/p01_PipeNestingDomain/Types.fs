@@ -8,13 +8,15 @@ type PipeDiameter =
    with
       static member toFloat (PipeDiameter d) = float d
       static member toInt (PipeDiameter d) = int d
+      static member toString (PipeDiameter d) = string (int d)
 
 type Pipe =
    {
       Diameter : PipeDiameter
       ParentIdO   : Option<PipeId>
+      ProductCode: string
+      Socket: string
    }
-
 type State =
    {
 

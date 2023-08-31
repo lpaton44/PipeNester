@@ -7,12 +7,17 @@
     </PropertyGroup>
 
     <ItemGroup>
+        
+        <Compile Include="Data.fs" />
         <Compile Include="Types.fs" />
-        <Compile Include="Version1.fs" />
-        <Compile Include="Version3.fs" />
-        <Content Include="pipe_nesting.csv" />
-        <Content Include="D105352  PVC pipe nesting calculator - Sheet8.csv" />
-        <Content Include="D105352  PVC pipe nesting calculator - Sheet9.csv" />
+        <Compile Include="LookUp.fs" />
+        <Compile Include="Helpers.fs" />
+        <Compile Include="Nester.fs" />
+        
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Thoth.Json" Version="10.2.0" />
     </ItemGroup>
 
 </Project>

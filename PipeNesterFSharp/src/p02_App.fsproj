@@ -7,11 +7,14 @@
         <ProjectReference Include="../p01_PipeNestingDomain/p01_PipeNestingDomain.fsproj" />
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="DataAccess.fs" />
         <None Include="index.html" />
         <Compile Include="Extensions.fs" />
+        <Content Include="index.css" />
+        <Compile Include="NewComponents.fs" />
         <Compile Include="Components.fs" />
         <Compile Include="Main.fs" />
-        <Content Include="index.css" />
+        
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Fable.FontAwesome" Version="3.0.0" />
