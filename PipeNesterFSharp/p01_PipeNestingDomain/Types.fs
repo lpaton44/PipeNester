@@ -12,10 +12,10 @@ type PipeDiameter =
 
 type Pipe =
    {
-      Diameter : PipeDiameter
+      Diameter    : PipeDiameter
       ParentIdO   : Option<PipeId>
-      ProductCode: string
-      Socket: string
+      ProductCode : string
+      Socket      : string
    }
 type State =
    {

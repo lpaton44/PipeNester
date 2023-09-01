@@ -38,6 +38,10 @@ module NesterHelpers =
            orderItems
                |> List.map (fun item -> item.Trim().Split(',') |> Array.toList)
                |> List.map removeBracketsFromPair
+               |> List.map ( fun item ->
+                    let pipe = itemCodeLookUpTable |> Map.find item[0]
+                    item[0], pipe, item[1] |> int
+                   )
        itemDetails
 
     let convertOrderListToString orderL =
@@ -56,17 +60,15 @@ module NesterHelpers =
        match order with
        | Some validOrder ->
             let details = getDetails validOrder.order
-            let tuples =
-                details
-                |> List.map (fun item -> ( item[0], item[1] |> int))
+
             [
-               for p, n in tuples do
-                  let (diameter, socket) = itemCodeLookUpTable |> Map.find p
+               for c,p,n in details do
+                  let diameter, socket = p
                   for _ in 1..n do
                      {
                          Diameter = PipeDiameter diameter
                          ParentIdO = None
-                         ProductCode = p
+                         ProductCode = c
                          Socket = socket
                      }
             ]

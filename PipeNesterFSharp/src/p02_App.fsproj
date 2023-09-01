@@ -11,8 +11,8 @@
         <None Include="index.html" />
         <Compile Include="Extensions.fs" />
         <Content Include="index.css" />
-        <Compile Include="NewComponents.fs" />
         <Compile Include="Components.fs" />
+        <Compile Include="OldComponents.fs" />
         <Compile Include="Main.fs" />
         
     </ItemGroup>

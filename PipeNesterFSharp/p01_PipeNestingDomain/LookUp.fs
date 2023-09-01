@@ -23,7 +23,9 @@ module LookUp =
    let innerDiameterAndSocketWithOuterDiameterToCountLookUpTable =
       let mutable lookUp = Map.empty
       for i in 0..(DiameterAndSocketTable.Length - 1) do
-            let key = (DiameterAndSocketTable[i][0], DiameterAndSocketTable[i][1], DiameterAndSocketTable[i][2])
+            let key = (PipeDiameter (DiameterAndSocketTable[i][0] |> int),
+                       PipeDiameter (DiameterAndSocketTable[i][1] |> int),
+                       DiameterAndSocketTable[i][2])
             let value = DiameterAndSocketTable[i][3] |> int
             lookUp <- lookUp.Add (key,value)
       lookUp
@@ -34,11 +36,14 @@ module LookUp =
       Children : List<Node>
    }
 
-   let lookupNumberOfPipesThatCanFit innerPipeDiameter innerPipeSocket outerPipeDiameter  =
-      printfn $"{innerPipeDiameter} {innerPipeSocket} {outerPipeDiameter}"
+   let lookupNumberOfPipesThatCanFit
+    (innerPipeDiameter : PipeDiameter)
+    (innerPipeSocket   : string)
+    (outerPipeDiameter : PipeDiameter)
+    =
       let n =
          innerDiameterAndSocketWithOuterDiameterToCountLookUpTable
-         |> Map.tryFind (innerPipeDiameter.ToString(), innerPipeSocket, outerPipeDiameter.ToString())
+         |> Map.tryFind (outerPipeDiameter, innerPipeDiameter, innerPipeSocket)
       match n with
       | None -> 0
       | Some v -> v

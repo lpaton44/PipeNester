@@ -244,13 +244,17 @@ module Nester =
 
       let getListOfUnNestedChildrenWithDiameter
          (childDiameter : PipeDiameter)
-         (n             : int)
-         (state         : State)
+         (childSocket   : string      )
+         (n             : int         )
+         (state         : State       )
          =
 
          state.UnNestedByDiameterM
          |> Map.find childDiameter
          |> Set.toList
+         |> List.map (fun id -> id, state.PipeM |> Map.find id)
+         |> List.filter (fun (id, pipe) -> pipe.Socket = childSocket)
+         |> List.map fst
          |> Helpers.splitAfterN n
 
       let getDiameterFromChildrenSet
@@ -348,13 +352,13 @@ module Nester =
          (pipeL: Pipe list)
          (outerPipeDiameter : PipeDiameter)
          =
-
          match pipeL with
          | [] -> None
          | firstOption::tail ->
             let n = LookUp.lookupNumberOfPipesThatCanFit firstOption.Diameter firstOption.Socket outerPipeDiameter
-            if (n = 0) then findOption tail outerPipeDiameter
-            else Some ( firstOption, n )
+            match n with
+            | 0 -> findOption tail outerPipeDiameter
+            | _ ->  Some ( firstOption, n )
 
       let findPipesToNestFromChildOptions
          (outerPipeDiameter : PipeDiameter)
@@ -366,7 +370,6 @@ module Nester =
             match innerOptions with
             | [] -> None
             | firstOption::tail ->
-
                let options = firstOption
                              |> snd
                              |> Set.map (fun i -> state.PipeM |> Map.find i)
@@ -443,7 +446,6 @@ module Nester =
         let unProcessedByDiameterM = state.EmptyByDiameterM
         let rec inner currentState unProcessedByDiameterM =
            let state = State.removeAnyEmptySetsFromState currentState
-
            match unProcessedByDiameterM with
            | _ when (Map.isEmpty unProcessedByDiameterM) -> state
            | _ ->
@@ -462,6 +464,7 @@ module Nester =
                     let children =
                        Nesting.getListOfUnNestedChildrenWithDiameter
                           child.Diameter
+                          child.Socket
                           (min canFit available)
                           state
                     Nesting.nestPipes
@@ -502,6 +505,7 @@ module Nester =
                       let children =
                          Nesting.getListOfUnNestedChildrenWithDiameter
                             nesting.ChildDiameter
+                            nesting.ChildSocket
                             (min canFit nesting.NestingCount)
                             state
                       Nesting.nestPipes children nextParentId state
@@ -567,23 +571,24 @@ module Nester =
          let results = groupOuterNodes state
          let finalString = $"Surface Area: {Nesting.getSurfaceArea state}\n"
 
-         let rec processNode node level finalString =
+         let rec processNode node level finalList =
             match node.Children with
-            | [] -> appendToString finalString $"{level},{(node.Diameter |> PipeDiameter.toInt)}"
+            | [] ->   (level, (node.Diameter |> PipeDiameter.toInt))::finalList
             | childrenL ->
 
-               let newString = appendToString finalString $"{level},{node.Diameter |> PipeDiameter.toInt};"
+               let newList = (level,node.Diameter |> PipeDiameter.toInt)::finalList
 
-               let rec loop children level newString =
+               let rec loop children level newList =
                   match children with
-                  | [] ->  newString
+                  | [] ->  newList
                   | child::tail ->
-                     let updatedString = processNode child (level + 1) newString
-                     loop tail level updatedString
+                     let updatedList = processNode child (level + 1) newList
+                     loop tail level updatedList
 
-               loop childrenL (level + 1) newString
+               loop childrenL (level + 1) newList
 
          results
          |> List.map (fun (i,node) ->
-            processNode node 2 $" {i} trees: ; "
+            let finalList = processNode node 2 []
+            (0, i)::(finalList |> List.rev)
          )
