@@ -17,6 +17,8 @@ type Pipe =
       ProductCode : string
       Socket      : string
    }
+
+
 type State =
    {
 
@@ -30,6 +32,6 @@ type State =
    }
 type Node =
    {
-      Diameter : PipeDiameter
+      ProductCode : string
       Children : List<Node>
    }

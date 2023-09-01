@@ -1,5 +1,4 @@
 namespace Nester
-open System
 
 module Nester =
 
@@ -211,7 +210,7 @@ module Nester =
                          |> List.map (fun (pipeId, pipe) ->
                               pipeId,
                               {
-                                 Diameter = pipe.Diameter
+                                 ProductCode = pipe.ProductCode
                                  Children = []
                               })
 
@@ -229,9 +228,10 @@ module Nester =
 
                let newNodes =
                      parents |> List.map (fun p ->
+                        let pipe = state.PipeM |> Map.find p
                         p,
                         {
-                           Diameter = state.PipeM |> Map.find p |> (fun pipe -> pipe.Diameter)
+                           ProductCode = pipe.ProductCode
                            Children = getChildren state p nodeL
                         }
                      )
@@ -253,7 +253,7 @@ module Nester =
          |> Map.find childDiameter
          |> Set.toList
          |> List.map (fun id -> id, state.PipeM |> Map.find id)
-         |> List.filter (fun (id, pipe) -> pipe.Socket = childSocket)
+         |> List.filter (fun (_, pipe) -> pipe.Socket = childSocket)
          |> List.map fst
          |> Helpers.splitAfterN n
 
@@ -396,7 +396,7 @@ module Nester =
             let groupedByDiameterAndSocket =
                state.UnNestedByDiameterM
                |> Map.toList
-               |> List.map (fun (childDiameter, pipeIdSet) ->
+               |> List.map (fun (_, pipeIdSet) ->
                   pipeIdSet
                   |> Set.toList
                   |> List.groupBy (fun pipeId ->
@@ -563,20 +563,16 @@ module Nester =
          |> List.groupBy id
          |> List.map (fun (x, xs) -> xs.Length, x)
 
-      let appendToString string1 string2 =
-         $"{string1} {string2}"
-
       let getGroupedNodes state =
 
          let results = groupOuterNodes state
-         let finalString = $"Surface Area: {Nesting.getSurfaceArea state}\n"
 
          let rec processNode node level finalList =
             match node.Children with
-            | [] ->   (level, (node.Diameter |> PipeDiameter.toInt))::finalList
+            | [] ->   (level, node.ProductCode )::finalList
             | childrenL ->
 
-               let newList = (level,node.Diameter |> PipeDiameter.toInt)::finalList
+               let newList = (level, node.ProductCode)::finalList
 
                let rec loop children level newList =
                   match children with
@@ -590,5 +586,5 @@ module Nester =
          results
          |> List.map (fun (i,node) ->
             let finalList = processNode node 2 []
-            (0, i)::(finalList |> List.rev)
+            i,(finalList |> List.rev)
          )

@@ -99,7 +99,7 @@ type Components =
                         [ Html.div
                              [ prop.className
                                   "sm:w-full lg:w-3/4 xl:w-1/2 m-auto border border-1 border-solid
-                              border-gray-500 rounded-lg p-10"
+                                     border-gray-500 rounded-lg p-10"
                                prop.children
                                   [ Html.div
                                        [ prop.className "mx-5 mb-5"
@@ -166,81 +166,47 @@ type Components =
                                                                                               [ if editingItem then
                                                                                                    Html.td
                                                                                                       [ Html.input
-                                                                                                           [ prop.id
-                                                                                                                "editProductCode"
-                                                                                                             prop.name
-                                                                                                                "editProductCode"
+                                                                                                           [ prop.id "editProductCode"
+                                                                                                             prop.name "editProductCode"
                                                                                                              prop.type'.text
-                                                                                                             prop.defaultValue
-                                                                                                                productCode
-                                                                                                             prop.className
-                                                                                                                "border border-1 border-solid border-gray-500 rounded-lg "
+                                                                                                             prop.defaultValue productCode
+                                                                                                             prop.className "border border-1 border-solid border-gray-500 rounded-lg "
                                                                                                              prop.onChange
-                                                                                                                (fun
-                                                                                                                     (event:
-                                                                                                                        Event) ->
-                                                                                                                   let newProductCode =
-                                                                                                                      (event.target
-                                                                                                                      :?> HTMLInputElement)
-                                                                                                                         .value
+                                                                                                                (fun (event: Event) ->
+                                                                                                                   let newProductCode = (event.target:?> HTMLInputElement).value
 
                                                                                                                    let newOrder =
                                                                                                                       orderItems
                                                                                                                       |> List.mapi
-                                                                                                                         (fun
-                                                                                                                              itemIndex
-                                                                                                                              (code,
-                                                                                                                               quantity) ->
-                                                                                                                            if
-                                                                                                                               (itemIndex = index)
-                                                                                                                            then
-                                                                                                                               (newProductCode,
-                                                                                                                                quantity)
-                                                                                                                            else
-                                                                                                                               (code,
-                                                                                                                                quantity))
-
-                                                                                                                   setEditedItems
-                                                                                                                      newOrder) ] ]
+                                                                                                                         (fun itemIndex (code, quantity) ->
+                                                                                                                            if (itemIndex = index)
+                                                                                                                            then (newProductCode, quantity)
+                                                                                                                            else (code, quantity))
+                                                                                                                   setEditedItems newOrder)
+                                                                                                                ]
+                                                                                                           ]
 
                                                                                                    Html.td
                                                                                                       [ Html.input
-                                                                                                           [ prop.id
-                                                                                                                "editQuantity"
-                                                                                                             prop.name
-                                                                                                                "editQuantity"
+                                                                                                           [ prop.id "editQuantity"
+                                                                                                             prop.name "editQuantity"
                                                                                                              prop.type'.number
-                                                                                                             prop.defaultValue
-                                                                                                                quantity
-                                                                                                             prop.className
-                                                                                                                "border border-1 border-solid border-gray-500 rounded-lg"
+                                                                                                             prop.defaultValue quantity
+                                                                                                             prop.className "border border-1 border-solid border-gray-500 rounded-lg"
                                                                                                              prop.onChange
-                                                                                                                (fun
-                                                                                                                     (event:
-                                                                                                                        Event) ->
-                                                                                                                   let newQuantity =
-                                                                                                                      (event.target
-                                                                                                                      :?> HTMLInputElement)
-                                                                                                                         .value
+                                                                                                                (fun (event: Event) ->
+                                                                                                                   let newQuantity = (event.target:?> HTMLInputElement).value
 
                                                                                                                    let newOrder =
                                                                                                                       orderItems
                                                                                                                       |> List.mapi
-                                                                                                                         (fun
-                                                                                                                              itemIndex
-                                                                                                                              (code,
-                                                                                                                               quantity) ->
-                                                                                                                            if
-                                                                                                                               (itemIndex = index)
-                                                                                                                            then
-                                                                                                                               (code,
-                                                                                                                                newQuantity)
-                                                                                                                            else
-                                                                                                                               (code,
-                                                                                                                                quantity))
+                                                                                                                         (fun itemIndex (code, quantity) ->
+                                                                                                                            if (itemIndex = index) then (code, newQuantity)
+                                                                                                                            else (code, quantity))
 
-                                                                                                                   setEditedItems
-                                                                                                                      newOrder) ] ]
+                                                                                                                   setEditedItems newOrder)
+                                                                                                                ]
+                                                                                                           ]
                                                                                                 else
                                                                                                    Html.td
                                                                                                       [ prop.text
@@ -413,36 +379,40 @@ type Components =
       Html.div
          [ prop.className "px-20 w-screen"
            prop.children
-              [ Html.h1
+              [
+                Html.h1
                    [ prop.className "text-center mb-10 text-2xl font-bold"
                      prop.text "All Orders" ]
-                Html.table
-                   [ prop.className "sm:w-3/4 xl:w-1/2 m-auto py-2 text-center table-auto text-xl"
-                     prop.children
-                        [ Html.thead
-                             [ prop.className "border-b font-semibold dark:border-neutral-500"
-                               prop.children
-                                  [ Html.tr
-                                       [ Html.th [ prop.text "Order Number" ]; Html.th [ prop.text "Order Summary" ] ] ] ]
-                          Html.tbody
-                             [ prop.className "py-2 text-center table-auto text-xl scroll-p-0"
-                               prop.children (
-                                  initialOrders
-                                  |> Map.toList
-                                  |> List.mapi (fun index (id, orderItem) ->
-                                     Html.tr
-                                        [ prop.key orderItem.orderNumber
-                                          prop.onClick (fun _ -> Router.navigate $"/allOrders/{id}")
-                                          prop.className (
-                                             if index % 2 = 0 then
-                                                "bg-gray-100"
-                                             else
-                                                "bg-white border-b dark:border-neutral-500"
-                                          )
-                                          prop.children
-                                             [ Html.td [ prop.text $"{orderItem.orderNumber}" ]
-                                               Html.td [ prop.children (getListItems orderItem.order) ] ] ])
-                               ) ] ] ]
+                Html.div [
+                   prop.className "overflow-y"
+                   prop.children [
+                         Html.table
+                            [ prop.className "sm:w-3/4 xl:w-1/2 m-auto py-2 text-center table-auto text-xl overflow-scroll"
+                              prop.children
+                                 [ Html.thead
+                                      [ prop.className "border-b font-semibold dark:border-neutral-500"
+                                        prop.children
+                                           [ Html.tr
+                                                [ Html.th [ prop.text "Order Number" ]; Html.th [ prop.text "Order Summary" ] ] ] ]
+                                   Html.tbody
+                                      [ prop.className "py-2 text-center table-auto text-xl"
+                                        prop.children (
+                                           initialOrders
+                                           |> Map.toList
+                                           |> List.mapi (fun index (id, orderItem) ->
+                                              Html.tr
+                                                 [ prop.key orderItem.orderNumber
+                                                   prop.onClick (fun _ -> Router.navigate $"/allOrders/{id}")
+                                                   prop.className (
+                                                      if index % 2 = 0 then
+                                                         "bg-gray-100"
+                                                      else
+                                                         "bg-white border-b dark:border-neutral-500"
+                                                   )
+                                                   prop.children
+                                                      [ Html.td [ prop.text $"{orderItem.orderNumber}" ]
+                                                        Html.td [ prop.children (getListItems orderItem.order) ] ] ])
+                                        ) ] ] ] ] ]
                 Html.div
                    [ prop.className "w-full  grid justify-items-center"
                      prop.children
@@ -457,6 +427,8 @@ type Components =
    static member OrderDetails(id: string) =
 
       let order, setOrder = React.useState None
+      let editedOrder, setEditedOrder = React.useState None
+      let editing, setEditing = React.useState false
 
       let getDataA () : JS.Promise<Order> = // Setup API call inside component to keep all related calls together with the component
          promise {
@@ -466,26 +438,56 @@ type Components =
             return! Fetch.get (url, decoder = Order.Decoder, caseStrategy = CamelCase)
          }
 
+
+      let deleteEntry () : JS.Promise<Order> = // Setup API call inside component to keep all related calls together with the component
+         promise {
+            let url =
+               $"https://pipenesting-default-rtdb.europe-west1.firebasedatabase.app/orders/{id}.json"
+
+            return! Fetch.delete (url)
+         }
+
+      let deleteEntryHandler () =
+         let prom = deleteEntry()
+         Router.navigate "allOrders"
+
       React.useEffectOnce (fun () ->
          let d = getDataA () // get the data from the API call (Promise)
-
          d.``then`` (fun order -> setOrder (Some order)) // On promise return set order state to returned result
          |> ignore // ignore promise after state has been set as React.useEffect always needs to return a unit
       )
+
+      let getTreeDetails tree =
+         tree
+         |> List.map (fun treeItem ->
+            let indentValue, code = treeItem
+            //let diameter, socket = LookUp.itemCodeLookUpTable |> Map.find code
+            let indent = $"{indentValue* 20}px"
+            Html.div [
+               prop.children [
+                  Html.p
+                     [
+                       prop.className "w-auto rounded font-semibold border border-1 border-solid"
+                       prop.style [ style.textIndent indent ]
+                       prop.text $"{code}"
+                     ]
+               ]
+            ]
+         )
 
       let getNesting pipeL =
          let state = Nesting.createInitialState pipeL
          let nesting = topDown.nestTopDown state
          Results.getGroupedNodes nesting
 
-      let getTreeItems (treeString: string) = treeString.Split(";") |> Array.toList
 
       Html.div
          [ prop.className "w-screen"
            prop.children
               [ Html.h1
-                   [ prop.className "text-center mb-10 text-2xl font-bold"
+                   [ prop.className "text-center mb-5 text-2xl font-bold"
                      prop.text $"Order Number {checkIfFound order}" ]
+
                 Html.table
                    [ prop.className "py-2 text-center table-auto text-xl sm:w-3/4 md:w-3/4 lg:w-1/2 xl:w-1/2 m-auto"
                      prop.children
@@ -497,80 +499,186 @@ type Components =
                                          Html.th [ prop.text "Diameter" ]
                                          Html.th [ prop.text "Socket" ]
                                          Html.th [ prop.text "Quantity" ] ] ] ]
-                          Html.tbody
-                             [ prop.children (
-                                  match order with
-                                  | Some nonEmptyOrder ->
-                                     getDetails nonEmptyOrder.order
-                                     |> List.mapi (fun index (c, (d, s), n) ->
-                                        Html.tr
-                                           [ prop.key index
-                                             prop.className (
-                                                if index % 2 = 0 then
-                                                   "bg-gray-100"
-                                                else
-                                                   "bg-white border-b dark:border-neutral-500"
-                                             )
-                                             prop.children
-                                                [ Html.td [ prop.text $"{c}" ]
-                                                  Html.td [ prop.text $"{d}" ]
-                                                  Html.td [ prop.text $"{s}" ]
-                                                  Html.td
-                                                     [ prop.text $"{n}"
+                          Html.tbody[
+                                  prop.children (
+                                        match order with
+                                        | Some validOrder ->
+                                           getDetails validOrder.order
+                                           |> List.mapi (fun index (c, (d, s), n) ->
+                                              Html.tr
+                                                 [ prop.key index
+                                                   prop.className (
+                                                      if index % 2 = 0 then
+                                                         "bg-gray-100"
+                                                      else
+                                                         "bg-white border-b dark:border-neutral-500"
+                                                   )
+                                                   prop.children
 
-                                                       ] ] ])
-                                  | _ -> []
+                                                      [
+                                                        if (not editing) then
+                                                           Html.td [ prop.text $"{c}" ]
+                                                           Html.td [ prop.text $"{d}" ]
+                                                           Html.td [ prop.text $"{s}" ]
+                                                           Html.td [ prop.text $"{n}"]
+
+                                                        else
+                                                           Html.td [
+                                                              prop.children [
+                                                                 Html.input [
+                                                                    prop.type'.text
+                                                                    prop.className "border text-center border-1 border-solid border-gray-500 rounded-lg"
+                                                                    prop.defaultValue c
+                                                                    prop.onChange ( fun (event : Event) ->
+                                                                       match order with
+                                                                       | None -> ()
+                                                                       | Some actualOrder ->
+                                                                          let newCode = (event.target:?> HTMLInputElement).value
+
+                                                                          let editedOrder =
+                                                                             getDetails actualOrder.order
+                                                                             |> List.mapi ( fun index' (code, _ , n) ->
+                                                                                if index' = index then $"({newCode},{n})"
+                                                                                else $"({code},{n})")
+
+                                                                          let newOrder = {
+                                                                             orderNumber = actualOrder.orderNumber
+                                                                             order = (editedOrder |> String.concat ";")
+                                                                          }
+                                                                          setEditedOrder (Some newOrder)
+                                                                    )
+                                                                 ]
+                                                              ]
+                                                           ]
+                                                           Html.td [ prop.text "-" ]
+                                                           Html.td [ prop.text "-" ]
+                                                           Html.td [
+                                                              Html.td [
+                                                              prop.children [
+                                                                 Html.input [
+                                                                    prop.type'.number
+                                                                    prop.className "border text-center border-1 border-solid border-gray-500 rounded-lg"
+                                                                    prop.defaultValue n
+                                                                    prop.onChange ( fun (event : Event) ->
+                                                                       match order with
+                                                                       | None -> ()
+                                                                       | Some actualOrder ->
+
+                                                                          let newQuantity = (event.target:?> HTMLInputElement).value
+
+                                                                          match newQuantity with
+                                                                          | "" -> ()
+                                                                          | _ ->
+
+                                                                             let editedOrder =
+                                                                                getDetails actualOrder.order
+                                                                                |> List.mapi ( fun index' (code, _ , n) ->
+                                                                                   if index' = index then $"({code},{newQuantity |> int})"
+                                                                                   else $"({code},{n})")
+
+                                                                             let newOrder = {
+                                                                                orderNumber = actualOrder.orderNumber
+                                                                                order = (editedOrder |> String.concat ";")
+                                                                             }
+                                                                             setEditedOrder (Some newOrder)
+                                                                    )
+                                                                 ]
+                                                              ]
+                                                           ]
+                                                           ]
+                                                       ]
+                                                   ])
+                                        | None -> []
                                ) ] ] ]
                 Html.div
-                   [ prop.className "w-1/3 m-auto mb-"
+                  [
+                    prop.className "flex justify-items-center"
+                    prop.children [
+                       Html.div [
+                          prop.className "flex m-auto"
+                          prop.children [
+                             if (not editing) then
+                                Html.button
+                                   [ prop.className
+                                        "flex mr-5 cursor-pointer bg-teal-600 rounded p-2 text-large text-white hover:bg-gray-400 mt-10"
+                                     prop.onClick (fun _ -> setEditing true)
+                                     prop.children [
+                                        Html.h3 [
+                                           prop.text "Edit Order"
+                                        ]
+                                        Html.div [
+                                           prop.className "color-white ml-2"
+                                           prop.children [ Fa.i [Fa.Solid.PencilAlt ] [] ] ]
+                                     ]
+                                 ]
+                                Html.button
+                                   [
+                                     prop.className
+                                        "flex cursor-pointer bg-red-300 rounded p-2 text-large text-black hover:bg-red-500 mt-10"
+                                     prop.onClick (fun _ -> deleteEntryHandler())
+                                     prop.children [
+
+                                        Html.h3 [
+                                           prop.text "Delete Order"
+                                          ]
+
+                                        Html.div [
+                                           prop.className "ml-2"
+                                           prop.children [ Fa.i [ Fa.Solid.Trash ] [] ] ]
+                                        ]
+                                     ]
+                             if editing then
+                                Html.button
+                                      [ prop.className
+                                           "flex mr-5 cursor-pointer bg-green-400 rounded px-5 py-2 text-large hover:bg-green-600 mt-10"
+                                        prop.onClick (fun _ ->
+                                           setOrder editedOrder
+                                           setEditing false)
+                                        prop.text "Save Edit"
+
+                                ]
+                                Html.button
+                                      [ prop.className
+                                           "flex mr-5 cursor-pointer bg-gray-400 rounded px-4  py-2 text-large  hover:bg-red-400 mt-10"
+                                        prop.onClick (fun _ -> setEditing false)
+                                        prop.text "Cancel Edit"
+                                 ]
+
+                                ]
+                             ]
+                          ]
+                       ]
+
+                Html.div
+                   [ prop.className "sm:w-3/4 md:w-3/4 lg:w-1/2 xl:w-1/2 m-auto "
                      prop.children
                         [ Html.h1
-                             [ prop.className "text-center text-xl font-bold mt-20 mb-10"
+                             [ prop.className "text-center text-xl font-bold mt-20 mb-5"
                                prop.text "Nesting" ]
                           Html.ul
                              [ prop.children (
                                   getNesting (convertOrderToPipeList order)
-                                  |> List.mapi (fun index tree ->
-                                     let treeElements = tree
-
+                                  |> List.mapi (fun index (numTrees, treeElements) ->
+                                     let tree = match numTrees with
+                                                | 1 -> "tree"
+                                                | _ -> "trees"
                                      Html.li
                                         [
-
                                           prop.className (
                                              if index % 2 = 0 then
                                                 "bg-gray-100 p-2 text-center"
                                              else
-                                                " text-center bg-white border-b dark:border-neutral-500 p-2"
+                                                "text-center bg-white border-b dark:border-neutral-500 p-2"
                                           )
                                           prop.children [
+                                             Html.h1 [
+                                                prop.className "text-xl font-semibold text-left"
+                                                prop.text $"{numTrees} {tree}:"
+                                             ]
                                              Html.div [
-
+                                                prop.className "text-large text-left"
                                                 prop.children (
-                                                   treeElements
-                                                   |> List.map (fun treeItem ->
-                                                      let (indentValue, item) = treeItem
-
-                                                      match indentValue with
-                                                      | 0 ->
-                                                         let trees =
-                                                            match item with
-                                                            | 1 -> "tree"
-                                                            | _ -> "trees"
-                                                         Html.p
-                                                            [
-                                                              prop.className "font-semibold text-large"
-                                                              prop.text $"{item} {trees}: "
-                                                            ]
-
-                                                      | _ ->
-                                                         let indent = $"{indentValue* 20}px"
-
-                                                         Html.p
-                                                            [
-                                                              prop.style [ style.textIndent indent ]
-                                                              prop.text $"{item}"
-                                                            ]
-                                                   )
+                                                   getTreeDetails treeElements
                                                 )
                                              ]
                                           ]
