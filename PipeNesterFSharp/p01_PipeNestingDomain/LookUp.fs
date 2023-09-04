@@ -30,6 +30,15 @@ module LookUp =
             lookUp <- lookUp.Add (key,value)
       lookUp
 
+   let containerLookupTable =
+      let mutable lookUp = Map.empty
+      for i in 0..(containerTable.Length - 1) do
+         for j in 1..4 do
+            let key = (PipeDiameter (containerTable[i][0]),j)
+            let value = containerTable[i][j]
+            lookUp <- lookUp.Add (key,value)
+      lookUp
+
 
    type Node = {
       Diameter : PipeDiameter
@@ -41,9 +50,22 @@ module LookUp =
     (innerPipeSocket   : string)
     (outerPipeDiameter : PipeDiameter)
     =
-      let n =
-         innerDiameterAndSocketWithOuterDiameterToCountLookUpTable
-         |> Map.tryFind (outerPipeDiameter, innerPipeDiameter, innerPipeSocket)
-      match n with
-      | None -> 0
-      | Some v -> v
+       let n =
+          innerDiameterAndSocketWithOuterDiameterToCountLookUpTable
+          |> Map.tryFind (outerPipeDiameter, innerPipeDiameter, innerPipeSocket)
+       match n with
+       | None -> 0
+       | Some v -> v
+
+
+   let lookupDiameterInContainer
+      (containerIndex : int)
+      (diameter   : PipeDiameter)
+      =
+         let n =
+            containerLookupTable
+            |> Map.tryFind (diameter, containerIndex)
+
+         match n with
+         | None -> 0
+         | Some v -> v

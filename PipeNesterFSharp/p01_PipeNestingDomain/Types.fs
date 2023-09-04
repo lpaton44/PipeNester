@@ -35,3 +35,11 @@ type Node =
       ProductCode : string
       Children : List<Node>
    }
+
+type Container =
+   {
+      Name     : string
+      Index    : int
+      PipeL    : List<Pipe>
+      Capacity : float
+   }

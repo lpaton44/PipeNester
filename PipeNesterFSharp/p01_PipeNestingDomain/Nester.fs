@@ -1,5 +1,7 @@
 namespace Nester
 
+open Microsoft.FSharp.Core
+
 module Nester =
 
    module Helpers =
@@ -564,16 +566,12 @@ module Nester =
          |> List.map (fun (x, xs) -> xs.Length, x)
 
       let getGroupedNodes state =
-
          let results = groupOuterNodes state
-
          let rec processNode node level finalList =
             match node.Children with
             | [] ->   (level, node.ProductCode )::finalList
             | childrenL ->
-
                let newList = (level, node.ProductCode)::finalList
-
                let rec loop children level newList =
                   match children with
                   | [] ->  newList
@@ -588,3 +586,62 @@ module Nester =
             let finalList = processNode node 2 []
             i,(finalList |> List.rev)
          )
+
+      let checkContainers pipeL canFit currentContainers =
+
+        let rec inner unCheckedContainers finalContainers remainingPipes =
+
+           match unCheckedContainers, remainingPipes with
+           | [], _ -> finalContainers, remainingPipes
+           | unCheckedContainers, [] -> unCheckedContainers@finalContainers, []
+           | containers, pipe::remainingPipes' ->
+              let container = containers |> List.head
+              let unCheckedContainers' = containers |> List.tail
+              let capacityTakenByPipe = 1.0/(canFit |> float)
+
+              if (container.Capacity >= capacityTakenByPipe) then
+
+                 let updatedContainer =
+                    {
+                       Index = container.Index
+                       Name = container.Name
+                       PipeL = pipe::container.PipeL
+                       Capacity = container.Capacity - capacityTakenByPipe
+                    }
+
+                 if (updatedContainer.Capacity >= capacityTakenByPipe) then
+                    inner (updatedContainer::unCheckedContainers') finalContainers remainingPipes'
+                 else
+                    inner unCheckedContainers' (updatedContainer::finalContainers) remainingPipes'
+              else
+                 inner (containers |> List.tail) (container::finalContainers) remainingPipes
+
+        inner currentContainers [] pipeL
+
+
+      let getContainerEstimate state containerIndex =
+
+            let groupedOuterPipes =
+               Nesting.getTopLevel (state.PipeM)
+               |> List.groupBy (fun (_, pipe) -> pipe.Diameter)
+               |> List.map (fun (diameter, pipeL) -> diameter, pipeL |> List.map snd)
+
+            let rec fillContainers pipeLByDiameter containerL =
+               match pipeLByDiameter with
+               | [] -> containerL
+               | (diameter, pipeL)::tail ->
+
+                  let canFit = LookUp.lookupDiameterInContainer containerIndex diameter
+                  let updatedContainerL, remainingPipes = checkContainers pipeL canFit containerL
+
+                  match remainingPipes with
+                  | [] -> fillContainers tail updatedContainerL
+
+                  | _ ->
+
+                     let addEmptyToContainerL =
+                        (Data.getNewEmptyContainer containerIndex)::updatedContainerL
+
+                     fillContainers ((diameter, remainingPipes)::tail) addEmptyToContainerL
+
+            fillContainers groupedOuterPipes []

@@ -7,9 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        
-        <Compile Include="Data.fs" />
         <Compile Include="Types.fs" />
+        <Compile Include="Data.fs" />
         <Compile Include="LookUp.fs" />
         <Compile Include="Helpers.fs" />
         <Compile Include="Nester.fs" />
