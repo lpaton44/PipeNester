@@ -647,8 +647,8 @@ namespace Nester
       match i with
          | 1 -> "20ft"
          | 2 -> "40ft"
-         | 3 -> "40ftHQ"
-         | 4 -> "18m"
+         | 3 -> "40ft HQ"
+         | 4 -> "18m MacDonalds Link"
          | _ -> ""
 
    let getNewEmptyContainer index =
@@ -656,7 +656,7 @@ namespace Nester
          Name = getContainerNameByIndex index
          Index = index
          PipeL = []
-         Capacity = 1
+         Capacity = 1.0001
       }
 
    let emptyContainers = [|
@@ -666,7 +666,7 @@ namespace Nester
                    Name = name
                    Index = i
                    PipeL = []
-                   Capacity = 1
+                   Capacity = 1.0001
                 }
    |]
 

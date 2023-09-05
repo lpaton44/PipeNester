@@ -164,8 +164,7 @@ type Components =
                                                                           quantity ]
 
                                                                ] ]) ) ] ] ] ] ] ] ]
-   
-   
+
    [<ReactComponent>]
    static member OrderForm() =
 
@@ -403,27 +402,29 @@ type Components =
               ) ]
 
       Html.div
-         [ prop.className "px-20 w-screen"
+         [ prop.className "px-20 "
            prop.children
               [
                 Html.h1
                    [ prop.className "text-center mb-10 text-2xl font-bold"
                      prop.text "All Orders" ]
                 Html.div [
-                   prop.className "overflow-y"
+                   prop.className "overflow-y-auto h-[calc(50vh)] sm:w-3/4 xl:w-1/2 m-auto"
                    prop.children [
                          Html.table
-                            [ prop.className "sm:w-3/4 xl:w-1/2 m-auto py-2 text-center table-auto text-xl overflow-scroll"
+                            [ prop.className "w-full m-auto py-2 text-center table-auto text-xl overflow-scroll"
                               prop.children
                                  [
                                    Html.thead
                                       [
-                                        prop.className "border-b font-semibold dark:border-neutral-500"
+                                        prop.className "sticky top-0 border-b bg-white font-semibold dark:border-neutral-500"
                                         prop.children
                                            [ Html.tr
                                                 [
-                                                  Html.th [ prop.text "Order Number" ]
-                                                  Html.th [ prop.text "Order Summary" ]
+                                                  Html.th [
+                                                   prop.text "Order Number" ]
+                                                  Html.th [
+                                                   prop.text "Order Summary" ]
                                                 ]
                                            ]
                                       ]
@@ -439,16 +440,16 @@ type Components =
                                                    prop.onClick (fun _ -> Router.navigate $"/allOrders/{id}")
                                                    prop.className (
                                                       if index % 2 = 0 then
-                                                         "bg-gray-100"
+                                                         "bg-gray-100 hover:bg-gray-300"
                                                       else
-                                                         "bg-white border-b dark:border-neutral-500"
+                                                         "bg-white border-b dark:border-neutral-500 hover:bg-gray-300"
                                                    )
                                                    prop.children
                                                       [ Html.td [ prop.text $"{orderItem.orderNumber}" ]
                                                         Html.td [ prop.children (getListItems orderItem.order) ] ] ])
                                         ) ] ] ] ] ]
                 Html.div
-                   [ prop.className "w-full  grid justify-items-center"
+                   [ prop.className "w-full grid justify-items-center"
                      prop.children
                         [ Html.button
                              [ prop.className
@@ -460,35 +461,44 @@ type Components =
    [<ReactComponent>]
    static member OrderDetails(id: string) =
 
+      let url = $"https://pipenesting-default-rtdb.europe-west1.firebasedatabase.app/orders/{id}.json"
       let order, setOrder = React.useState None
       let editedOrder, setEditedOrder = React.useState None
+      let deletedItems, setDeletedItems = React.useState []
       let editing, setEditing = React.useState false
 
-      let getDataA () : JS.Promise<Order> = // Setup API call inside component to keep all related calls together with the component
+      let getDataA () : JS.Promise<Order> =
          promise {
-            let url =
-               $"https://pipenesting-default-rtdb.europe-west1.firebasedatabase.app/orders/{id}.json"
-
             return! Fetch.get (url, decoder = Order.Decoder, caseStrategy = CamelCase)
          }
 
+      let updateDataA () =
+         match order with
+         | None -> ()
+         | Some fullOrder ->
+            let encodedOrder = Order.Encoder fullOrder
+            let response = Fetch.put (url, encodedOrder, decoder = Order.Decoder, caseStrategy = CamelCase)
+            response |> ignore //should return ok message or something
 
-      let deleteEntry () : JS.Promise<Order> = // Setup API call inside component to keep all related calls together with the component
-         promise {
-            let url =
-               $"https://pipenesting-default-rtdb.europe-west1.firebasedatabase.app/orders/{id}.json"
 
-            return! Fetch.delete url
-         }
+      let showOrderEditedNotification() =
+         0 // show card or something here
 
       let deleteEntryHandler () =
-         let _ = deleteEntry()
+         let _ =
+            promise {
+               return! Fetch.delete url
+         }
          Router.navigate "allOrders"
 
+      React.useEffect ((fun () ->
+         updateDataA()
+         showOrderEditedNotification() |> ignore),[| box order|])
+
       React.useEffectOnce (fun () ->
-         let d = getDataA () // get the data from the API call (Promise)
-         d.``then`` (fun order -> setOrder (Some order)) // On promise return set order state to returned result
-         |> ignore // ignore promise after state has been set as React.useEffect always needs to return a unit
+         let d = getDataA ()
+         d.``then`` (fun order -> setOrder (Some order))
+         |> ignore
       )
 
       let getTreeDetails tree =
@@ -501,7 +511,7 @@ type Components =
                prop.children [
                   Html.p
                      [
-                       prop.className "w-auto rounded font-semibold border border-1 border-solid"
+                       prop.className "w-auto rounded text-xl border border-1 border-solid"
                        prop.style [ style.textIndent indent ]
                        prop.text $"{code}"
                      ]
@@ -517,231 +527,381 @@ type Components =
       let getContainerInfo =
          let init = Nesting.createInitialState (convertOrderToPipeList order)
          let state = topDown.nestTopDown init
-         Results.getContainerEstimate state 2
-         |> List.length
+
+
+         Results.getAllContainerEstimates state
+         |> List.mapi (fun index (name, cL) ->
+                Html.tr [
+                   prop.children [
+                      Html.td [
+                        prop.className (
+                           if index % 2 = 0 then
+                              " bg-gray-100 p-2 text-center"
+                           else
+                              "text-center bg-white border-b dark:border-neutral-500 p-2"
+                        )
+                        prop.text $"{name}"
+                      ]
+                      Html.td [
+                        prop.className (
+                           if index % 2 = 0 then
+                              "bg-gray-100 p-2 text-center"
+                           else
+                              "text-center bg-white border-b dark:border-neutral-500 p-2"
+                        )
+                        prop.text $"{cL.Length}"
+                      ]
+                   ]
+                ]
+         )
+
 
       Html.div
          [ prop.className "w-screen"
            prop.children
-              [ Html.h1
-                   [ prop.className "text-center mb-5 text-2xl font-bold"
-                     prop.text $"Order Number {checkIfFound order}" ]
-                Html.h1 [ prop.text getContainerInfo ]
+              [
+                Html.div [
+                  prop.className "sm:h-3/4 md:h-3/4 lg:h-1/2 xl:h-1/2"
+                  prop.children [
 
-                Html.table
-                   [ prop.className "py-2 text-center table-auto text-xl sm:w-3/4 md:w-3/4 lg:w-1/2 xl:w-1/2 m-auto"
-                     prop.children
-                        [ Html.thead
-                             [ prop.className "border-b font-semibold dark:border-neutral-500"
-                               prop.children
-                                  [ Html.tr
-                                       [ Html.th [ prop.text "Product Code" ]
-                                         Html.th [ prop.text "Diameter" ]
-                                         Html.th [ prop.text "Socket" ]
-                                         Html.th [ prop.text "Quantity" ] ] ] ]
-                          Html.tbody[
-                                  prop.children (
-                                        match order with
-                                        | Some validOrder ->
-                                           getDetails validOrder.order
-                                           |> List.mapi (fun index (c, (d, s), n) ->
-                                              Html.tr
-                                                 [ prop.key index
-                                                   prop.className (
-                                                      if index % 2 = 0 then
-                                                         "bg-gray-100"
-                                                      else
-                                                         "bg-white border-b dark:border-neutral-500"
-                                                   )
-                                                   prop.children
+                        Html.h1 [
+                          prop.className "text-center mb-5 text-2xl font-bold"
+                          prop.text $"Order Number {checkIfFound order}"
+                        ]
 
-                                                      [
-                                                        if (not editing) then
-                                                           Html.td [ prop.text $"{c}" ]
-                                                           Html.td [ prop.text $"{d}" ]
-                                                           Html.td [ prop.text $"{s}" ]
-                                                           Html.td [ prop.text $"{n}"]
+                        Html.table [
+                           prop.className "py-2 text-center table-auto text-xl sm:w-3/4 md:w-3/4 lg:w-1/2 xl:w-1/2 m-auto"
+                           prop.children
+                              [
+                                Html.thead
+                                   [ prop.className "border-b bg-teal-600 text-white dark:border-neutral-500"
+                                     prop.children
+                                        [ Html.tr [
+                                             prop.className "font-light"
+                                             prop.children [
 
-                                                        else
-                                                           Html.td [
-                                                              prop.children [
-                                                                 Html.input [
-                                                                    prop.type'.text
-                                                                    prop.className "border text-center border-1 border-solid border-gray-500 rounded-lg"
-                                                                    prop.defaultValue c
-                                                                    prop.onChange ( fun (event : Event) ->
-                                                                       match order with
-                                                                       | None -> ()
-                                                                       | Some actualOrder ->
-                                                                          let newCode = (event.target:?> HTMLInputElement).value
+                                               Html.th [ prop.text "Product Code" ]
+                                               Html.th [ prop.text "Diameter" ]
+                                               Html.th [ prop.text "Socket" ]
+                                               Html.th [ prop.text "Quantity" ] ] ]  ] ]
+                                Html.tbody[
+                                        prop.children (
+                                              match order with
+                                              | Some validOrder ->
+                                                 getDetails validOrder.order
+                                                 |> List.mapi (fun index (c, (d, s), n) ->
+                                                    Html.tr
+                                                       [ prop.key index
+                                                         prop.className (
+                                                            if deletedItems |> List.contains index then
+                                                               "bg-red-400"
+                                                            else if index % 2 = 0 then
+                                                               "bg-gray-100"
+                                                            else
+                                                               "bg-white border-b dark:border-neutral-500"
+                                                         )
+                                                         prop.children
 
-                                                                          let editedOrder =
-                                                                             getDetails actualOrder.order
-                                                                             |> List.mapi ( fun index' (code, _ , n) ->
-                                                                                if index' = index then $"({newCode},{n})"
-                                                                                else $"({code},{n})")
+                                                            [
+                                                              if (not editing) then
+                                                                 Html.td [ prop.text $"{c}" ]
+                                                                 Html.td [ prop.text $"{d}" ]
+                                                                 Html.td [ prop.text $"{s}" ]
+                                                                 Html.td [ prop.text $"{n}"]
 
-                                                                          let newOrder = {
-                                                                             orderNumber = actualOrder.orderNumber
-                                                                             order = (editedOrder |> String.concat ";")
-                                                                          }
-                                                                          setEditedOrder (Some newOrder)
-                                                                    )
-                                                                 ]
-                                                              ]
-                                                           ]
-                                                           Html.td [ prop.text "-" ]
-                                                           Html.td [ prop.text "-" ]
-                                                           Html.td [
-                                                              Html.td [
-                                                              prop.children [
-                                                                 Html.input [
-                                                                    prop.type'.number
-                                                                    prop.className "border text-center border-1 border-solid border-gray-500 rounded-lg"
-                                                                    prop.defaultValue n
-                                                                    prop.onChange ( fun (event : Event) ->
-                                                                       match order with
-                                                                       | None -> ()
-                                                                       | Some actualOrder ->
+                                                              else
+                                                                 Html.td [
+                                                                    prop.children [
+                                                                       Html.input [
+                                                                          prop.type'.text
+                                                                          prop.className " border text-center border-1 border-solid border-gray-500 rounded-lg"
+                                                                          prop.defaultValue c
+                                                                          prop.onChange ( fun (event : Event) ->
+                                                                             match order with
+                                                                             | None -> ()
+                                                                             | Some actualOrder ->
+                                                                                let newCode = (event.target:?> HTMLInputElement).value
 
-                                                                          let newQuantity = (event.target:?> HTMLInputElement).value
+                                                                                let editedOrder =
+                                                                                   getDetails actualOrder.order
+                                                                                   |> List.mapi ( fun index' (code, _ , n) ->
+                                                                                      if index' = index then $"({newCode},{n})"
+                                                                                      else $"({code},{n})")
 
-                                                                          match newQuantity with
-                                                                          | "" -> ()
-                                                                          | _ ->
-
-                                                                             let editedOrder =
-                                                                                getDetails actualOrder.order
-                                                                                |> List.mapi ( fun index' (code, _ , n) ->
-                                                                                   if index' = index then $"({code},{newQuantity |> int})"
-                                                                                   else $"({code},{n})")
-
-                                                                             let newOrder = {
-                                                                                orderNumber = actualOrder.orderNumber
-                                                                                order = (editedOrder |> String.concat ";")
-                                                                             }
-                                                                             setEditedOrder (Some newOrder)
+                                                                                let newOrder = {
+                                                                                   orderNumber = actualOrder.orderNumber
+                                                                                   order = (editedOrder |> String.concat ";")
+                                                                                }
+                                                                                setEditedOrder (Some newOrder)
                                                                           )
-                                                                      ]
+                                                                       ]
                                                                     ]
                                                                  ]
+                                                                 Html.td [ prop.text "-" ]
+                                                                 Html.td [ prop.text "-" ]
+                                                                 Html.td [
+                                                                       prop.className "flex justify-center"
+                                                                       prop.children [
+                                                                          Html.input
+                                                                             [
+                                                                             prop.type'.number
+                                                                             prop.className "ml-10 -auto border text-center border-1 border-solid border-gray-500 rounded-lg"
+                                                                             prop.defaultValue n
+                                                                             prop.onChange ( fun (event : Event) ->
+                                                                                match order with
+                                                                                | None -> ()
+                                                                                | Some actualOrder ->
+                                                                                   let newQuantity = (event.target:?> HTMLInputElement).value
+                                                                                   match newQuantity with
+                                                                                   | "" -> ()
+                                                                                   | _ ->
+                                                                                      let editedOrder =
+                                                                                         getDetails actualOrder.order
+                                                                                         |> List.mapi ( fun index' (code, _ , n) ->
+                                                                                            if index' = index then $"({code},{newQuantity |> int})"
+                                                                                            else $"({code},{n})")
+                                                                                      let newOrder = {
+                                                                                         orderNumber = actualOrder.orderNumber
+                                                                                         order = (editedOrder |> String.concat ";")
+                                                                                      }
+
+                                                                                      setEditedOrder (Some newOrder)
+                                                                                   )
+                                                                               ]
+                                                                          Html.div [
+                                                                              prop.className "text-sm m-2 justify-self-end hover:text-red-700"
+                                                                              prop.onClick (fun _ ->
+                                                                                  match order with
+                                                                                  | None -> ()
+                                                                                  | Some actualOrder ->
+                                                                                     let editedOrder =
+                                                                                            getDetails actualOrder.order
+                                                                                            |> List.mapi ( fun index' (code, _, quantity) ->
+                                                                                               if (index = index') then true,$"({code},{quantity})"
+                                                                                               else false, $"({code},{quantity})")
+                                                                                            |> List.filter (fun (deleted, _) -> not deleted)
+                                                                                            |> List.map snd
+
+                                                                                     let newOrder = {
+                                                                                            orderNumber = actualOrder.orderNumber
+                                                                                            order = (editedOrder |> String.concat ";")
+                                                                                         }
+                                                                                     setDeletedItems (index::deletedItems)
+                                                                                     setEditedOrder (Some newOrder)
+                                                                                 )
+                                                                              prop.children [
+                                                                                 if not (deletedItems |> List.contains index ) then
+                                                                                    Fa.i [ Fa.Solid.Trash ] []
+                                                                              ]
+                                                                          ]
+
+                                                                          Html.div [
+                                                                             prop.className "text-sm mt-1 mb-1 justify-self-end hover:text-green-600"
+                                                                             prop.onClick (fun _ ->
+                                                                                  match order with
+                                                                                  | None -> ()
+                                                                                  | Some actualOrder ->
+
+                                                                                     let deletedItems' =
+                                                                                        deletedItems
+                                                                                        |> List.filter (fun i -> not (i = index))
+
+                                                                                     let editedOrder =
+                                                                                            getDetails actualOrder.order
+                                                                                            |> List.mapi ( fun index' (code, _, quantity) ->
+                                                                                               if (deletedItems' |> List.contains index') then true,""
+                                                                                               else false, $"({code},{quantity})")
+                                                                                            |> List.filter (fun (deleted, _) -> not deleted)
+                                                                                            |> List.map snd
+
+                                                                                     let newOrder = {
+                                                                                            orderNumber = actualOrder.orderNumber
+                                                                                            order = (editedOrder |> String.concat ";")
+                                                                                         }
+
+                                                                                     setDeletedItems deletedItems'
+                                                                                     setEditedOrder (Some newOrder)
+                                                                                 )
+                                                                             prop.children [
+                                                                                if (deletedItems |> List.contains index ) then
+                                                                                   Fa.i [ Fa.Solid.Undo ] []
+                                                                             ]
+                                                                          ]
+                                                                       ]
+                                                                 ]
                                                               ]
                                                            ]
-                                                       ]
-                                                     )
-                                        | None -> []
-                               ) ] ] ]
-                Html.div
-                  [
-                    prop.className "flex justify-items-center"
-                    prop.children [
-                       Html.div [
-                          prop.className "flex m-auto"
-                          prop.children [
+                                                         )
+                                              | None -> []
+                                     ) ] ] ]
 
-                             if (not editing) then
-                                Html.button
-                                   [ prop.className
-                                        "flex mr-5 cursor-pointer bg-teal-600 rounded p-2 text-large text-white hover:bg-gray-400 mt-10"
-                                     prop.onClick (fun _ -> setEditing true)
-                                     prop.children [
-                                        Html.h3 [
-                                           prop.text "Edit Order"
-                                        ]
-                                        Html.div [
-                                           prop.className "color-white ml-2"
-                                           prop.children [ Fa.i [Fa.Solid.PencilAlt ] [] ] ]
-                                     ]
-                                 ]
-                                Html.button
-                                   [
-                                     prop.className
-                                        "flex cursor-pointer bg-red-300 rounded p-2 text-large text-black hover:bg-red-500 mt-10"
-                                     prop.onClick (fun _ -> deleteEntryHandler())
-                                     prop.children [
+                        Html.div
+                          [
+                            prop.className "flex justify-items-center"
+                            prop.children [
+                               Html.div [
+                                  prop.className "flex m-auto"
+                                  prop.children [
 
-                                        Html.h3 [
-                                           prop.text "Delete Order"
-                                          ]
-
-                                        Html.div [
-                                           prop.className "ml-2"
-                                           prop.children [ Fa.i [ Fa.Solid.Trash ] [] ] ]
-                                        ]
-                                     ]
-                             if editing then
-                                Html.button
-                                      [ prop.className
-                                           "flex mr-5 cursor-pointer bg-green-400 rounded px-5 py-2 text-large hover:bg-green-600 mt-10"
-                                        prop.onClick (fun _ ->
-                                           setOrder editedOrder
-                                           setEditing false)
-                                        prop.text "Save Edit"
-
-                                ]
-                                Html.button
-                                      [ prop.className
-                                           "flex mr-5 cursor-pointer bg-gray-400 rounded px-4  py-2 text-large  hover:bg-red-400 mt-10"
-                                        prop.onClick (fun _ -> setEditing false)
-                                        prop.text "Cancel Edit"
-                                 ]
-
-                                ]
-                             ]
-                          ]
-                       ]
-
-                Html.div
-                   [ prop.className "sm:w-3/4 md:w-3/4 lg:w-1/2 xl:w-1/2 m-auto "
-                     prop.children
-                        [ Html.h1
-                             [ prop.className "text-center text-xl font-bold mt-20 mb-5"
-                               prop.text "Nesting" ]
-
-                          Html.ul
-                             [ prop.children (
-                                  getNesting (convertOrderToPipeList order)
-                                  |> List.mapi (fun index (numTrees, treeElements) ->
-                                     let tree = match numTrees with
-                                                | 1 -> "tree"
-                                                | _ -> "trees"
-                                     Html.li
-                                        [
-                                          prop.className (
-                                             if index % 2 = 0 then
-                                                "bg-gray-100 p-2 text-center"
-                                             else
-                                                "text-center bg-white border-b dark:border-neutral-500 p-2"
-                                          )
-                                          prop.children [
-                                             Html.h1 [
-                                                prop.className "text-xl font-semibold text-left"
-                                                prop.text $"{numTrees} {tree}:"
+                                     if (not editing) then
+                                        Html.button
+                                          [ prop.className
+                                               "flex mr-5 cursor-pointer bg-gray-500 rounded p-2 text-large text-white hover:bg-gray-400 mt-10"
+                                            prop.text "Back to Orders"
+                                            prop.onClick (fun _ -> Router.navigate "/allOrders") ]
+                                        Html.button
+                                           [ prop.className
+                                                "flex mr-5 cursor-pointer bg-teal-600 rounded p-2 text-large text-white hover:bg-gray-400 mt-10"
+                                             prop.onClick (fun _ -> setEditing true)
+                                             prop.children [
+                                                Html.h3 [
+                                                   prop.text "Edit Order"
+                                                ]
+                                                Html.div [
+                                                   prop.className "color-white ml-2"
+                                                   prop.children [ Fa.i [Fa.Solid.PencilAlt ] [] ] ]
                                              ]
-                                             Html.div [
-                                                prop.className "text-large text-left"
-                                                prop.children (
-                                                   getTreeDetails treeElements
+                                         ]
+                                        Html.button
+                                           [
+                                             prop.className
+                                                "flex cursor-pointer bg-red-300 rounded p-2 text-large text-black hover:bg-red-500 mt-10"
+                                             prop.onClick (fun _ -> deleteEntryHandler())
+                                             prop.children [
+
+                                                Html.h3 [
+                                                   prop.text "Delete Order"
+                                                  ]
+
+                                                Html.div [
+                                                   prop.className "ml-2"
+                                                   prop.children [ Fa.i [ Fa.Solid.Trash ] [] ] ]
+                                                ]
+                                             ]
+                                     if editing then
+                                        Html.button
+                                              [ prop.className
+                                                   "flex mr-5 cursor-pointer bg-green-400 rounded px-5 py-2 text-large hover:bg-green-600 mt-10"
+                                                prop.onClick (fun _ ->
+                                                   setOrder editedOrder
+                                                   setDeletedItems []
+                                                   setEditing false)
+                                                prop.text "Save Edit"
+
+                                        ]
+                                        Html.button
+                                              [ prop.className
+                                                   "flex mr-5 cursor-pointer bg-gray-400 rounded px-4  py-2 text-large  hover:bg-red-400 mt-10"
+                                                prop.onClick (fun _ ->
+                                                   setDeletedItems []
+                                                   setEditing false)
+                                                prop.text "Cancel Edit"
+                                         ]
+                                        ]
+                                     ]
+                                  ]
+                               ]
+
+                        Html.div
+                           [ prop.className "w-full m-auto "
+                             prop.children
+                                [
+                                  Html.h1
+                                     [ prop.className "text-center text-2xl font-semibold mt-20 mb-5"
+                                       prop.text $"Container Estimates" ]
+
+                                  Html.table
+                                    [
+                                      prop.className "py-2 text-center table-auto text-xl sm:w-3/4 md:w-3/4 lg:w-1/2 xl:w-1/2 m-auto"
+                                      prop.children
+                                         [
+                                           Html.thead
+                                              [ prop.className "border-b bg-teal-600 text-white font-semibold dark:border-neutral-500"
+                                                prop.children
+                                                   [ Html.tr
+                                                        [ Html.th [ prop.text "Container" ]
+                                                          Html.th [ prop.text "Estimated Quantity"]
+                                                          ] ] ]
+                                           Html.tbody [
+                                              prop.className ""
+                                              prop.children getContainerInfo
+                                            ]
+                                         ]
+                                    ]
+                           ]
+                        ]
+
+
+                        Html.div
+                           [ prop.className "sm:w-3/4 md:w-3/4 lg:w-1/2 xl:w-1/2 m-auto "
+                             prop.children
+                                [ Html.h1
+                                     [ prop.className "text-center text-2xl font-bold mt-20 mb-5"
+                                       prop.text "Nesting" ]
+
+                                  Html.table
+                                     [
+                                       prop.className "w-full"
+                                       prop.children [
+                                          Html.thead [
+                                             prop.className "text-xl bg-teal-600 text-white font-semibold"
+                                             prop.children [
+                                                Html.th [
+                                                  prop.text "Number of trees"
+                                                ]
+                                                Html.th [
+                                                  prop.text "Nesting"
+                                               ]
+                                             ] ]
+
+                                          Html.tbody [
+                                             prop.children (
+                                                getNesting (convertOrderToPipeList order)
+                                                |> List.mapi (fun index (numTrees, treeElements) ->
+                                                   let tree = match numTrees with
+                                                              | 1 -> "tree"
+                                                              | _ -> "trees"
+                                                   Html.tr [
+                                                      prop.children [
+                                                         Html.td [
+                                                            prop.className (
+                                                              if index % 2 = 0 then
+                                                                 "bg-gray-100 p-2 text-center"
+                                                              else
+                                                                 "text-center bg-white border-b dark:border-neutral-500 p-2"
+                                                               )
+                                                            prop.text $"{numTrees} {tree}:"
+                                                         ]
+                                                         Html.td [
+                                                            prop.className (
+                                                                 if index % 2 = 0 then
+                                                                    "bg-gray-100 p-2 text-center"
+                                                                 else
+                                                                    "text-center bg-white border-b dark:border-neutral-500 p-2"
+                                                            )
+                                                            prop.children (
+                                                                 getTreeDetails treeElements
+                                                            )
+                                                         ]
+                                                      ]
+                                                   ]
                                                 )
-                                             ]
+                                             )
                                           ]
-                                        ]
-                                     )
-                                  )
-                             ]
-                          ]
-                     ]
+                                       ]
+                                    ]
+                                  ]
+                                ]
 
-                Html.div
-                   [ prop.className "w-full grid justify-items-center"
-                     prop.children
-                        [ Html.button
-                             [ prop.className
-                                  "cursor-pointer bg-gray-300 rounded p-3 px-5  text-xl text-black hover:bg-red-300 mt-10"
-                               prop.text "Back"
-                               prop.onClick (fun _ -> Router.navigate "/allOrders") ] ] ] ] ]
-
-
+                        Html.div
+                          [
+                          prop.className "w-full grid justify-items-center"
+                          prop.children
+                             [ Html.button
+                                  [ prop.className
+                                       "cursor-pointer bg-gray-500 rounded p-3 px-5 text-large text-white hover:bg-red-300 mt-10"
+                                    prop.text "Back to Orders"
+                                    prop.onClick (fun _ -> Router.navigate "/allOrders") ] ] ] ] ] ] ]
 
    [<ReactComponent>]
    static member Router() =

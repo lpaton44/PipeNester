@@ -3,6 +3,7 @@ namespace Nester
 open Microsoft.FSharp.Core
 
 module Nester =
+   open System
 
    module Helpers =
       let addElementToSetInMap (setId : 'setId) (setElementId : 'elementId) m =
@@ -597,10 +598,9 @@ module Nester =
            | containers, pipe::remainingPipes' ->
               let container = containers |> List.head
               let unCheckedContainers' = containers |> List.tail
-              let capacityTakenByPipe = 1.0/(canFit |> float)
+              let capacityTakenByPipe =  (1.0/(canFit |> float))
 
               if (container.Capacity >= capacityTakenByPipe) then
-
                  let updatedContainer =
                     {
                        Index = container.Index
@@ -645,3 +645,8 @@ module Nester =
                      fillContainers ((diameter, remainingPipes)::tail) addEmptyToContainerL
 
             fillContainers groupedOuterPipes []
+
+      let getAllContainerEstimates state =
+         let estimates = [1..4]
+                         |> List.map (fun i -> Data.getContainerNameByIndex i, getContainerEstimate state i)
+         estimates
